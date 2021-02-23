@@ -1,0 +1,409 @@
+  /********************************************************************/
+  /* Process the QIST subrecord.                                      */
+  /********************************************************************/
+  processQIST: procedure;
+    dcl base                               pointer;
+    base = ifi_base + smf_base->qws1.qws10r4o;
+
+    if (debug_mode = '1'b) then do;
+      put skip list('');
+      put skip list(time()
+                 !! ' RIF0001I - I - QIST.');
+
+      put skip list(time()
+                 !! ' RIF0001I - I - qws1.qws10r4o : '
+                 !! trim(smf_base->qws1.qws10r4o));
+      put skip list(time()
+                 !! ' RIF0001I - I - qws1.qws10r4l : '
+                 !! trim(smf_base->qws1.qws10r4l));
+      put skip list(time()
+                 !! ' RIF0001I - I - qws1.qws10r4n : '
+                 !! trim(smf_base->qws1.qws10r4n));
+    end;
+
+    if (firstItteration = false
+      & gather_QIST     = '1'b) then do;
+
+      ins_qist.qistrllm = base->qist.qistrllm - saved_qist.qistrllm;
+      ins_qist.qistrplm = base->qist.qistrplm - saved_qist.qistrplm;
+      ins_qist.qistrstg = base->qist.qistrstg - saved_qist.qistrstg;
+      ins_qist.qistrmax = base->qist.qistrmax - saved_qist.qistrmax;
+      ins_qist.qistcols = base->qist.qistcols - saved_qist.qistcols;
+      ins_qist.qistwfne = base->qist.qistwfne - saved_qist.qistwfne;
+      ins_qist.qistwfp1 = base->qist.qistwfp1 - saved_qist.qistwfp1;
+      ins_qist.qistwfp2 = base->qist.qistwfp2 - saved_qist.qistwfp2;
+      ins_qist.qistrcci = base->qist.qistrcci - saved_qist.qistrcci;
+      ins_qist.qistrccd = base->qist.qistrccd - saved_qist.qistrccd;
+      ins_qist.qistrccu = base->qist.qistrccu - saved_qist.qistrccu;
+      ins_qist.qisti2of = base->qist.qisti2of - saved_qist.qisti2of;
+      ins_qist.qistimnc = base->qist.qistimnc - saved_qist.qistimnc;
+      ins_qist.qistinpa = base->qist.qistinpa - saved_qist.qistinpa;
+      ins_qist.qistinpd = base->qist.qistinpd - saved_qist.qistinpd;
+      ins_qist.qistinpr = base->qist.qistinpr - saved_qist.qistinpr;
+      ins_qist.qistinpe = base->qist.qistinpe - saved_qist.qistinpe;
+
+      ins_qist.qistrhig       = base->qist.qistrhig;
+      ins_qist.qistrcur       = base->qist.qistrcur;
+      ins_qist.qistwmxa       = base->qist.qistwmxa;
+      ins_qist.qistwmxu       = base->qist.qistwmxu;
+      ins_qist.qistwcto       = base->qist.qistwcto;
+      ins_qist.qistw4k        = base->qist.qistw4k;
+      ins_qist.qistw32k       = base->qist.qistw32k;
+      ins_qist.qistimac       = base->qist.qistimac;
+      ins_qist.qistimsc       = base->qist.qistimsc;
+      ins_qist.qistimah       = base->qist.qistimah;
+      ins_qist.qistimsh       = base->qist.qistimsh;
+      ins_qist.qistsiac       = base->qist.qistsiac;
+      ins_qist.qistsisc       = base->qist.qistsisc;
+      ins_qist.qistsiah       = base->qist.qistsiah;
+      ins_qist.qistsish       = base->qist.qistsish;
+      ins_qist.qistwfrhig     = base->qist.qistwfrhig;
+      ins_qist.qistwfrcur     = base->qist.qistwfrcur;
+      ins_qist.qisti2ac       = base->qist.qisti2ac;
+      ins_qist.qisti2ah       = base->qist.qisti2ah;
+      ins_qist.qistasth       = base->qist.qistasth;
+      ins_qist.qistssth       = base->qist.qistssth;
+      ins_qist.qistamxu       = base->qist.qistamxu;
+      ins_qist.qistwstg       = base->qist.qistwstg;
+      ins_qist.qistdgttstg    = base->qist.qistdgttstg;
+      ins_qist.qistdgttcto    = base->qist.qistdgttcto;
+      ins_qist.qistdgttmxu    = base->qist.qistdgttmxu;
+      ins_qist.qistwfstg      = base->qist.qistwfstg;
+      ins_qist.qistwfcto      = base->qist.qistwfcto;
+      ins_qist.qistwfmxu      = base->qist.qistwfmxu;
+      ins_qist.qisttravmin    = base->qist.qisttravmin;
+      ins_qist.qistftbcant    = base->qist.qistftbcant;
+      ins_qist.qistftbcan     = base->qist.qistftbcan;
+      ins_qist.qistftbsize    = base->qist.qistftbsize;
+      ins_qist.qistftbnump    = base->qist.qistftbnump;
+      ins_qist.qistftbnumc    = base->qist.qistftbnumc;
+
+      exec sql
+        insert into RIF.ifcid_0002_data_manager
+              (insert_ts
+              ,unix_time
+              ,subsystem
+              ,qistrllm
+              ,qistrplm
+              ,qistrstg
+              ,qistrmax
+              ,qistcols
+              ,qistwfne
+              ,qistwfp1
+              ,qistwfp2
+              ,qistrcci
+              ,qistrccd
+              ,qistrccu
+              ,qisti2of
+              ,qistimnc
+              ,qistinpa
+              ,qistinpd
+              ,qistinpr
+              ,qistinpe
+              ,qistrhig
+              ,qistrcur
+              ,qistwmxa
+              ,qistwmxu
+              ,qistwcto
+              ,qistw4k
+              ,qistw32k
+              ,qistimac
+              ,qistimsc
+              ,qistimah
+              ,qistimsh
+              ,qistsiac
+              ,qistsisc
+              ,qistsiah
+              ,qistsish
+              ,qistwfrhig
+              ,qistwfrcur
+              ,qisti2ac
+              ,qisti2ah
+              ,qistasth
+              ,qistssth
+              ,qistamxu
+              ,qistwstg
+              ,qistdgttstg
+              ,qistdgttcto
+              ,qistdgttmxu
+              ,qistwfstg
+              ,qistwfcto
+              ,qistwfmxu
+              ,qisttravmin
+              ,qistftbcant
+              ,qistftbcan
+              ,qistftbsize
+              ,qistftbnump
+              ,qistftbnumc
+              )
+        values(current timestamp
+              ,:current_unix_time
+              ,:admin_info_ssid.subsystem_name
+              ,:ins_qist.qistrllm
+              ,:ins_qist.qistrplm
+              ,:ins_qist.qistrstg
+              ,:ins_qist.qistrmax
+              ,:ins_qist.qistcols
+              ,:ins_qist.qistwfne
+              ,:ins_qist.qistwfp1
+              ,:ins_qist.qistwfp2
+              ,:ins_qist.qistrcci
+              ,:ins_qist.qistrccd
+              ,:ins_qist.qistrccu
+              ,:ins_qist.qisti2of
+              ,:ins_qist.qistimnc
+              ,:ins_qist.qistinpa
+              ,:ins_qist.qistinpd
+              ,:ins_qist.qistinpr
+              ,:ins_qist.qistinpe
+              ,:ins_qist.qistrhig
+              ,:ins_qist.qistrcur
+              ,:ins_qist.qistwmxa
+              ,:ins_qist.qistwmxu
+              ,:ins_qist.qistwcto
+              ,:ins_qist.qistw4k
+              ,:ins_qist.qistw32k
+              ,:ins_qist.qistimac
+              ,:ins_qist.qistimsc
+              ,:ins_qist.qistimah
+              ,:ins_qist.qistimsh
+              ,:ins_qist.qistsiac
+              ,:ins_qist.qistsisc
+              ,:ins_qist.qistsiah
+              ,:ins_qist.qistsish
+              ,:ins_qist.qistwfrhig
+              ,:ins_qist.qistwfrcur
+              ,:ins_qist.qisti2ac
+              ,:ins_qist.qisti2ah
+              ,:ins_qist.qistasth
+              ,:ins_qist.qistssth
+              ,:ins_qist.qistamxu
+              ,:ins_qist.qistwstg
+              ,:ins_qist.qistdgttstg
+              ,:ins_qist.qistdgttcto
+              ,:ins_qist.qistdgttmxu
+              ,:ins_qist.qistwfstg
+              ,:ins_qist.qistwfcto
+              ,:ins_qist.qistwfmxu
+              ,:ins_qist.qisttravmin
+              ,:ins_qist.qistftbcant
+              ,:ins_qist.qistftbcan
+              ,:ins_qist.qistftbsize
+              ,:ins_qist.qistftbnump
+              ,:ins_qist.qistftbnumc
+              );
+
+      call checksql('Insert QIST',csql_warn);
+    end;
+
+    /* Save the current version for comparison in the next itteration.*/
+    saved_qist = base->qist;
+  end processQIST;
+
+
+  /********************************************************************/
+  /* QIST based version                                               */
+  /********************************************************************/
+  dcl 1 qist  based,
+        2 qihead,
+          3 qiid        char(2),
+          3 qilen       bin fixed(15),
+          3 qieye       char(4),
+        2 qistats,
+          3 qistrllm    bin fixed(31),            /*    cummulative */
+          3 qistrplm    bin fixed(31),            /*    cummulative */
+          3 qistrhac,
+            5 qistrhig  bin fixed(31),            /* non-cumulative */
+            5 qistrcur  bin fixed(31),            /* non-cumulative */
+          3 qistrstg    bin fixed(31),            /*    cummulative */
+          3 qistrmax    bin fixed(31),            /*    cummulative */
+          3 qistcols    bin fixed(31),            /*    cummulative */
+          3 *           char(16),
+          3 qistwfne    bin fixed(31),            /*    cummulative */
+          3 *           char(16),
+          3 qistwfp1    bin fixed(31),            /*    cummulative */
+          3 qistwfp2    bin fixed(31),            /*    cummulative */
+          3 qistrcci    bin fixed(31),            /*    cummulative */
+          3 qistrccd    bin fixed(31),            /*    cummulative */
+          3 qistrccu    bin fixed(31),            /*    cummulative */
+          3 *           char(4),
+          3 qistwmxa    bin fixed(63),            /* non-cumulative */
+          3 qistwmxu    bin fixed(63),            /* non-cumulative */
+          3 qistwcto    bin fixed(63),            /* non-cumulative */
+          3 qistw4k     bin fixed(63),            /* non-cumulative */
+          3 qistw32k    bin fixed(63),            /* non-cumulative */
+          3 qistimac    bin fixed(63),            /* non-cumulative */
+          3 qistimsc    bin fixed(63),            /* non-cumulative */
+          3 qistimah    bin fixed(63),            /* non-cumulative */
+          3 qistimsh    bin fixed(63),            /* non-cumulative */
+          3 qistsiac    bin fixed(63),            /* non-cumulative */
+          3 qistsisc    bin fixed(63),            /* non-cumulative */
+          3 qistsiah    bin fixed(63),            /* non-cumulative */
+          3 qistsish    bin fixed(63),            /* non-cumulative */
+          3 qistwfrhig  bin fixed(63),            /* non-cumulative */
+          3 qistwfrcur  bin fixed(63),            /* non-cumulative */
+          3 qisti2ac    bin fixed(63),            /* non-cumulative */
+          3 qisti2ah    bin fixed(63),            /* non-cumulative */
+          3 qisti2of    bin fixed(63),            /*    cummulative */
+          3 qistimnc    bin fixed(63),            /*    cummulative */
+          3 qistasth    bin fixed(31),            /* non-cumulative */
+          3 qistssth    bin fixed(31),            /* non-cumulative */
+          3 qistamxu    bin fixed(63),            /* non-cumulative */
+          3 qistwstg    bin fixed(63),            /* non-cumulative */
+          3 qistdgttstg bin fixed(63),            /* non-cumulative */
+          3 qistdgttcto bin fixed(63),            /* non-cumulative */
+          3 qistdgttmxu bin fixed(63),            /* non-cumulative */
+          3 qistwfstg   bin fixed(63),            /* non-cumulative */
+          3 qistwfcto   bin fixed(63),            /* non-cumulative */
+          3 qistwfmxu   bin fixed(63),            /* non-cumulative */
+          3 qistinpa    bin fixed(63),            /*    cummulative */
+          3 qistinpd    bin fixed(63),            /*    cummulative */
+          3 qisttravmin bin fixed(31),            /* non-cumulative */
+          3 qistftbcant bin fixed(31),            /* non-cumulative */
+          3 qistftbcan  bin fixed(31),            /* non-cumulative */
+          3 qistftbsize bin fixed(31),            /* non-cumulative */
+          3 qistftbnump bin fixed(31),            /* non-cumulative */
+          3 qistftbnumc bin fixed(31),            /* non-cumulative */
+          3 qistinpr    bin fixed(31),            /*    cummulative */
+          3 qistinpe    bin fixed(31),            /*    cummulative */
+          3 *           char(16),
+        2 qistend       char(0);
+
+
+  /********************************************************************/
+  /* QIST saved version for delta                                     */
+  /********************************************************************/
+  dcl 1 saved_qist,
+        2 qihead,
+          3 qiid        char(2),
+          3 qilen       bin fixed(15),
+          3 qieye       char(4),
+        2 qistats,
+          3 qistrllm    bin fixed(31),            /*    cummulative */
+          3 qistrplm    bin fixed(31),            /*    cummulative */
+          3 qistrhac,
+            5 qistrhig  bin fixed(31),            /* non-cumulative */
+            5 qistrcur  bin fixed(31),            /* non-cumulative */
+          3 qistrstg    bin fixed(31),            /*    cummulative */
+          3 qistrmax    bin fixed(31),            /*    cummulative */
+          3 qistcols    bin fixed(31),            /*    cummulative */
+          3 *           char(16),
+          3 qistwfne    bin fixed(31),            /*    cummulative */
+          3 *           char(16),
+          3 qistwfp1    bin fixed(31),            /*    cummulative */
+          3 qistwfp2    bin fixed(31),            /*    cummulative */
+          3 qistrcci    bin fixed(31),            /*    cummulative */
+          3 qistrccd    bin fixed(31),            /*    cummulative */
+          3 qistrccu    bin fixed(31),            /*    cummulative */
+          3 *           char(4),
+          3 qistwmxa    bin fixed(63),            /* non-cumulative */
+          3 qistwmxu    bin fixed(63),            /* non-cumulative */
+          3 qistwcto    bin fixed(63),            /* non-cumulative */
+          3 qistw4k     bin fixed(63),            /* non-cumulative */
+          3 qistw32k    bin fixed(63),            /* non-cumulative */
+          3 qistimac    bin fixed(63),            /* non-cumulative */
+          3 qistimsc    bin fixed(63),            /* non-cumulative */
+          3 qistimah    bin fixed(63),            /* non-cumulative */
+          3 qistimsh    bin fixed(63),            /* non-cumulative */
+          3 qistsiac    bin fixed(63),            /* non-cumulative */
+          3 qistsisc    bin fixed(63),            /* non-cumulative */
+          3 qistsiah    bin fixed(63),            /* non-cumulative */
+          3 qistsish    bin fixed(63),            /* non-cumulative */
+          3 qistwfrhig  bin fixed(63),            /* non-cumulative */
+          3 qistwfrcur  bin fixed(63),            /* non-cumulative */
+          3 qisti2ac    bin fixed(63),            /* non-cumulative */
+          3 qisti2ah    bin fixed(63),            /* non-cumulative */
+          3 qisti2of    bin fixed(63),            /*    cummulative */
+          3 qistimnc    bin fixed(63),            /*    cummulative */
+          3 qistasth    bin fixed(31),            /* non-cumulative */
+          3 qistssth    bin fixed(31),            /* non-cumulative */
+          3 qistamxu    bin fixed(63),            /* non-cumulative */
+          3 qistwstg    bin fixed(63),            /* non-cumulative */
+          3 qistdgttstg bin fixed(63),            /* non-cumulative */
+          3 qistdgttcto bin fixed(63),            /* non-cumulative */
+          3 qistdgttmxu bin fixed(63),            /* non-cumulative */
+          3 qistwfstg   bin fixed(63),            /* non-cumulative */
+          3 qistwfcto   bin fixed(63),            /* non-cumulative */
+          3 qistwfmxu   bin fixed(63),            /* non-cumulative */
+          3 qistinpa    bin fixed(63),            /*    cummulative */
+          3 qistinpd    bin fixed(63),            /*    cummulative */
+          3 qisttravmin bin fixed(31),            /* non-cumulative */
+          3 qistftbcant bin fixed(31),            /* non-cumulative */
+          3 qistftbcan  bin fixed(31),            /* non-cumulative */
+          3 qistftbsize bin fixed(31),            /* non-cumulative */
+          3 qistftbnump bin fixed(31),            /* non-cumulative */
+          3 qistftbnumc bin fixed(31),            /* non-cumulative */
+          3 qistinpr    bin fixed(31),            /*    cummulative */
+          3 qistinpe    bin fixed(31),            /*    cummulative */
+          3 *           char(16),
+        2 qistend       char(0);
+
+
+  /********************************************************************/
+  /* QIST version for inserting                                       */
+  /********************************************************************/
+  dcl 1 ins_qist,
+        2 qihead,
+          3 qiid        char(2),
+          3 qilen       bin fixed(15),
+          3 qieye       char(4),
+        2 qistats,
+          3 qistrllm    bin fixed(31),            /*    cummulative */
+          3 qistrplm    bin fixed(31),            /*    cummulative */
+          3 qistrhac,
+            5 qistrhig  bin fixed(31),            /* non-cumulative */
+            5 qistrcur  bin fixed(31),            /* non-cumulative */
+          3 qistrstg    bin fixed(31),            /*    cummulative */
+          3 qistrmax    bin fixed(31),            /*    cummulative */
+          3 qistcols    bin fixed(31),            /*    cummulative */
+          3 *           char(16),
+          3 qistwfne    bin fixed(31),            /*    cummulative */
+          3 *           char(16),
+          3 qistwfp1    bin fixed(31),            /*    cummulative */
+          3 qistwfp2    bin fixed(31),            /*    cummulative */
+          3 qistrcci    bin fixed(31),            /*    cummulative */
+          3 qistrccd    bin fixed(31),            /*    cummulative */
+          3 qistrccu    bin fixed(31),            /*    cummulative */
+          3 *           char(4),
+          3 qistwmxa    bin fixed(63),            /* non-cumulative */
+          3 qistwmxu    bin fixed(63),            /* non-cumulative */
+          3 qistwcto    bin fixed(63),            /* non-cumulative */
+          3 qistw4k     bin fixed(63),            /* non-cumulative */
+          3 qistw32k    bin fixed(63),            /* non-cumulative */
+          3 qistimac    bin fixed(63),            /* non-cumulative */
+          3 qistimsc    bin fixed(63),            /* non-cumulative */
+          3 qistimah    bin fixed(63),            /* non-cumulative */
+          3 qistimsh    bin fixed(63),            /* non-cumulative */
+          3 qistsiac    bin fixed(63),            /* non-cumulative */
+          3 qistsisc    bin fixed(63),            /* non-cumulative */
+          3 qistsiah    bin fixed(63),            /* non-cumulative */
+          3 qistsish    bin fixed(63),            /* non-cumulative */
+          3 qistwfrhig  bin fixed(63),            /* non-cumulative */
+          3 qistwfrcur  bin fixed(63),            /* non-cumulative */
+          3 qisti2ac    bin fixed(63),            /* non-cumulative */
+          3 qisti2ah    bin fixed(63),            /* non-cumulative */
+          3 qisti2of    bin fixed(63),            /*    cummulative */
+          3 qistimnc    bin fixed(63),            /*    cummulative */
+          3 qistasth    bin fixed(31),            /* non-cumulative */
+          3 qistssth    bin fixed(31),            /* non-cumulative */
+          3 qistamxu    bin fixed(63),            /* non-cumulative */
+          3 qistwstg    bin fixed(63),            /* non-cumulative */
+          3 qistdgttstg bin fixed(63),            /* non-cumulative */
+          3 qistdgttcto bin fixed(63),            /* non-cumulative */
+          3 qistdgttmxu bin fixed(63),            /* non-cumulative */
+          3 qistwfstg   bin fixed(63),            /* non-cumulative */
+          3 qistwfcto   bin fixed(63),            /* non-cumulative */
+          3 qistwfmxu   bin fixed(63),            /* non-cumulative */
+          3 qistinpa    bin fixed(63),            /*    cummulative */
+          3 qistinpd    bin fixed(63),            /*    cummulative */
+          3 qisttravmin bin fixed(31),            /* non-cumulative */
+          3 qistftbcant bin fixed(31),            /* non-cumulative */
+          3 qistftbcan  bin fixed(31),            /* non-cumulative */
+          3 qistftbsize bin fixed(31),            /* non-cumulative */
+          3 qistftbnump bin fixed(31),            /* non-cumulative */
+          3 qistftbnumc bin fixed(31),            /* non-cumulative */
+          3 qistinpr    bin fixed(31),            /*    cummulative */
+          3 qistinpe    bin fixed(31),            /*    cummulative */
+          3 *           char(16),
+        2 qistend       char(0);
+

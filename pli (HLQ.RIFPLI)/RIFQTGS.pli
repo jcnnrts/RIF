@@ -1,0 +1,220 @@
+  /********************************************************************/
+  /* Process the QTGS subrecord.                                      */
+  /********************************************************************/
+  processQTGS: procedure;
+    dcl base                               pointer;
+    base = ifi_base + smf_base->qws1.qws10r8o;
+
+    if (debug_mode = '1'b) then do;
+      put skip list('');
+      put skip list(time()
+                 !! ' RIF0001I - I - QTGS.');
+
+      put skip list(time()
+                 !! ' RIF0001I - I - qws1.qws10r8o : '
+                 !! trim(smf_base->qws1.qws10r8o));
+      put skip list(time()
+                 !! ' RIF0001I - I - qws1.qws10r8l : '
+                 !! trim(smf_base->qws1.qws10r8l));
+      put skip list(time()
+                 !! ' RIF0001I - I - qws1.qws10r8n : '
+                 !! trim(smf_base->qws1.qws10r8n));
+    end;
+
+    if (firstItteration = false
+      & gather_QTGS     = '1'b) then do;
+      /* Calculate the delta between the newly fetched IFI record and */
+      /* the saved previous itteration.                               */
+
+      ins_QTGS.qtgslplk  = base->QTGS.qtgslplk - saved_QTGS.qtgslplk;
+      ins_QTGS.qtgscplk  = base->QTGS.qtgscplk - saved_QTGS.qtgscplk;
+      ins_QTGS.qtgsuplk  = base->QTGS.qtgsuplk - saved_QTGS.qtgsuplk;
+      ins_QTGS.qtgslslm  = base->QTGS.qtgslslm - saved_QTGS.qtgslslm;
+      ins_QTGS.qtgscslm  = base->QTGS.qtgscslm - saved_QTGS.qtgscslm;
+      ins_QTGS.qtgsuslm  = base->QTGS.qtgsuslm - saved_QTGS.qtgsuslm;
+      ins_QTGS.qtgsiglo  = base->QTGS.qtgsiglo - saved_QTGS.qtgsiglo;
+      ins_QTGS.qtgssglo  = base->QTGS.qtgssglo - saved_QTGS.qtgssglo;
+      ins_QTGS.qtgsflse  = base->QTGS.qtgsflse - saved_QTGS.qtgsflse;
+      ins_QTGS.qtgsdrta  = base->QTGS.qtgsdrta - saved_QTGS.qtgsdrta;
+      ins_QTGS.qtgsntfy  = base->QTGS.qtgsntfy - saved_QTGS.qtgsntfy;
+      ins_QTGS.qtgsntfr  = base->QTGS.qtgsntfr - saved_QTGS.qtgsntfr;
+      ins_QTGS.qtgskids  = base->QTGS.qtgskids - saved_QTGS.qtgskids;
+      ins_QTGS.qtgspppe  = base->QTGS.qtgspppe - saved_QTGS.qtgspppe;
+      ins_QTGS.qtgspgpe  = base->QTGS.qtgspgpe - saved_QTGS.qtgspgpe;
+      ins_QTGS.qtgsotpe  = base->QTGS.qtgsotpe - saved_QTGS.qtgsotpe;
+      ins_QTGS.qtgschnp  = base->QTGS.qtgschnp - saved_QTGS.qtgschnp;
+      ins_QTGS.qtgspemx  = base->QTGS.qtgspemx - saved_QTGS.qtgspemx;
+      ins_QTGS.qtgspeqw  = base->QTGS.qtgspeqw - saved_QTGS.qtgspeqw;
+      ins_QTGS.qtgsflmg  = base->QTGS.qtgsflmg - saved_QTGS.qtgsflmg;
+      ins_QTGS.qtgscrej  = base->QTGS.qtgscrej - saved_QTGS.qtgscrej;
+      ins_QTGS.qtgslcaic = base->QTGS.qtgslcaic- saved_QTGS.qtgslcaic;
+      ins_QTGS.qtgsdgbl  = base->QTGS.qtgsdgbl - saved_QTGS.qtgsdgbl;
+      ins_QTGS.qtgslicnt = base->QTGS.qtgslicnt- saved_QTGS.qtgslicnt;
+      ins_QTGS.qtgsgicnt = base->QTGS.qtgsgicnt- saved_QTGS.qtgsgicnt;
+      ins_QTGS.qtgsgcont = base->QTGS.qtgsgcont- saved_QTGS.qtgsgcont;
+      ins_QTGS.qtgsfcont = base->QTGS.qtgsfcont- saved_QTGS.qtgsfcont;
+      ins_QTGS.qtgscplok = base->QTGS.qtgscplok- saved_QTGS.qtgscplok;
+      ins_QTGS.qtgscnoty = base->QTGS.qtgscnoty- saved_QTGS.qtgscnoty;
+
+      exec sql
+        insert into RIF.ifcid_0002_global_locking_data
+        values(current timestamp
+              ,:current_unix_time
+              ,:admin_info_ssid.subsystem_name
+              ,:ins_QTGS.qtgslplk
+              ,:ins_QTGS.qtgscplk
+              ,:ins_QTGS.qtgsuplk
+              ,:ins_QTGS.qtgslslm
+              ,:ins_QTGS.qtgscslm
+              ,:ins_QTGS.qtgsuslm
+              ,:ins_QTGS.qtgsiglo
+              ,:ins_QTGS.qtgssglo
+              ,:ins_QTGS.qtgsflse
+              ,:ins_QTGS.qtgsdrta
+              ,:ins_QTGS.qtgsntfy
+              ,:ins_QTGS.qtgsntfr
+              ,:ins_QTGS.qtgskids
+              ,:ins_QTGS.qtgspppe
+              ,:ins_QTGS.qtgspgpe
+              ,:ins_QTGS.qtgsotpe
+              ,:ins_QTGS.qtgschnp
+              ,:ins_QTGS.qtgspemx
+              ,:ins_QTGS.qtgspeqw
+              ,:ins_QTGS.qtgsflmg
+              ,:ins_QTGS.qtgscrej
+              ,:ins_QTGS.qtgslcaic
+              ,:ins_QTGS.qtgsdgbl
+              ,:ins_QTGS.qtgslicnt
+              ,:ins_QTGS.qtgsgicnt
+              ,:ins_QTGS.qtgsgcont
+              ,:ins_QTGS.qtgsfcont
+              ,:ins_QTGS.qtgscplok
+              ,:ins_QTGS.qtgscnoty
+              );
+
+      call checksql('Insert QTGS',csql_warn);
+    end;
+
+    /* Save the current version for comparison in the next itteration.*/
+    saved_QTGS = base->QTGS;
+
+  end processQTGS;
+
+
+  /********************************************************************/
+  /* QTGS based version                                               */
+  /********************************************************************/
+  dcl 1 qtgs based,
+        3 qtgslplk   bin fixed(31),
+        3 qtgscplk   bin fixed(31),
+        3 qtgsuplk   bin fixed(31),
+        3 qtgslslm   bin fixed(31),
+        3 qtgscslm   bin fixed(31),
+        3 qtgsuslm   bin fixed(31),
+        3 qtgsiglo   bin fixed(31),
+        3 qtgssglo   bin fixed(31),
+        3 qtgsflse   bin fixed(31),
+        3 qtgsdrta   bin fixed(31),
+        3 qtgsntfy   bin fixed(31),
+        3 qtgsntfr   bin fixed(31),
+        3 qtgskids   bin fixed(31),
+        3 qtgspppe   bin fixed(31),
+        3 qtgspgpe   bin fixed(31),
+        3 qtgsotpe   bin fixed(31),
+        3 qtgschnp   bin fixed(31),
+        3 qtgspemx   bin fixed(31),
+        3 qtgspeqw   bin fixed(31),
+        3 qtgsflmg   bin fixed(31),
+        3 qtgscrej   bin fixed(31),
+        3 qtgsflgs   bin fixed(31),
+        /*5 qtgsfcon bit(1),
+          5 *        bit(31),*/
+        3 qtgslcaic  bin fixed(31),
+        3 qtgsdgbl   bin fixed(31),
+        3 qtgslicnt  bin fixed(31),
+        3 qtgsgicnt  bin fixed(31),
+        3 qtgsgcont  bin fixed(31),
+        3 qtgsfcont  bin fixed(31),
+        3 qtgscplok  bin fixed(31),
+        3 qtgscnoty  bin fixed(31),
+        3 qtgsend    char(0);
+
+
+  /********************************************************************/
+  /* QTGS saved version                                               */
+  /********************************************************************/
+  dcl 1 saved_qtgs,
+        3 qtgslplk   bin fixed(31),
+        3 qtgscplk   bin fixed(31),
+        3 qtgsuplk   bin fixed(31),
+        3 qtgslslm   bin fixed(31),
+        3 qtgscslm   bin fixed(31),
+        3 qtgsuslm   bin fixed(31),
+        3 qtgsiglo   bin fixed(31),
+        3 qtgssglo   bin fixed(31),
+        3 qtgsflse   bin fixed(31),
+        3 qtgsdrta   bin fixed(31),
+        3 qtgsntfy   bin fixed(31),
+        3 qtgsntfr   bin fixed(31),
+        3 qtgskids   bin fixed(31),
+        3 qtgspppe   bin fixed(31),
+        3 qtgspgpe   bin fixed(31),
+        3 qtgsotpe   bin fixed(31),
+        3 qtgschnp   bin fixed(31),
+        3 qtgspemx   bin fixed(31),
+        3 qtgspeqw   bin fixed(31),
+        3 qtgsflmg   bin fixed(31),
+        3 qtgscrej   bin fixed(31),
+        3 qtgsflgs   bin fixed(31),
+        /*5 qtgsfcon bit(1),
+          5 *        bit(31),*/
+        3 qtgslcaic  bin fixed(31),
+        3 qtgsdgbl   bin fixed(31),
+        3 qtgslicnt  bin fixed(31),
+        3 qtgsgicnt  bin fixed(31),
+        3 qtgsgcont  bin fixed(31),
+        3 qtgsfcont  bin fixed(31),
+        3 qtgscplok  bin fixed(31),
+        3 qtgscnoty  bin fixed(31),
+        3 qtgsend    char(0);
+
+
+  /********************************************************************/
+  /* QTGS version for inserting                                       */
+  /********************************************************************/
+  dcl 1 ins_qtgs,
+        3 qtgslplk   bin fixed(31),
+        3 qtgscplk   bin fixed(31),
+        3 qtgsuplk   bin fixed(31),
+        3 qtgslslm   bin fixed(31),
+        3 qtgscslm   bin fixed(31),
+        3 qtgsuslm   bin fixed(31),
+        3 qtgsiglo   bin fixed(31),
+        3 qtgssglo   bin fixed(31),
+        3 qtgsflse   bin fixed(31),
+        3 qtgsdrta   bin fixed(31),
+        3 qtgsntfy   bin fixed(31),
+        3 qtgsntfr   bin fixed(31),
+        3 qtgskids   bin fixed(31),
+        3 qtgspppe   bin fixed(31),
+        3 qtgspgpe   bin fixed(31),
+        3 qtgsotpe   bin fixed(31),
+        3 qtgschnp   bin fixed(31),
+        3 qtgspemx   bin fixed(31),
+        3 qtgspeqw   bin fixed(31),
+        3 qtgsflmg   bin fixed(31),
+        3 qtgscrej   bin fixed(31),
+        3 qtgsflgs   bin fixed(31),
+        /*5 qtgsfcon bit(1),
+          5 *        bit(31),*/
+        3 qtgslcaic  bin fixed(31),
+        3 qtgsdgbl   bin fixed(31),
+        3 qtgslicnt  bin fixed(31),
+        3 qtgsgicnt  bin fixed(31),
+        3 qtgsgcont  bin fixed(31),
+        3 qtgsfcont  bin fixed(31),
+        3 qtgscplok  bin fixed(31),
+        3 qtgscnoty  bin fixed(31),
+        3 qtgsend    char(0);
+
+

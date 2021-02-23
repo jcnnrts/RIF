@@ -1,0 +1,108 @@
+  /********************************************************************/        
+  /* Db2 connectivity.                                               */         
+  /********************************************************************/        
+  exec sql include sqlca;                                                       
+                                                                                
+  dcl dsnali                       ext entry options(asm inter retcode);        
+  fetch dsnali;                                                                 
+                                                                                
+                                                                                
+  /********************************************************************/        
+  /* Constants.                                                      */         
+  /********************************************************************/        
+  dcl 1 checkSql_severity,                                                      
+        2 csql_crit                bin fixed(31) init(0),                       
+        2 csql_warn                bin fixed(31) init(1),                       
+        2 csql_end                 bin fixed(31) init(2);                       
+                                                                                
+                                                                                
+  /********************************************************************/        
+  /* Open the connection to Db2.                                      */        
+  /********************************************************************/        
+  opencaf: procedure;                                                           
+    /* Open connection using CAF.                                     */        
+    dcl 1 caf_open,                                                             
+          3 caf_open_function char(12)       init('OPEN'),                      
+          3 caf_open_ssid     char(4),                                          
+          3 caf_open_plan     char(8)        init('RIF'),                       
+          3 caf_open_retcode  fixed bin(31)  init(0),                           
+          3 caf_open_reascode char(4)        init('');                          
+                                                                                
+    caf_open.caf_open_ssid = rif_options.subsystem_id;                          
+                                                                                
+                                                                                
+    call dsnali( caf_open_function,                                             
+                 caf_open_ssid,                                                 
+                 caf_open_plan,                                                 
+                 caf_open_retcode,                                              
+                 caf_open_reascode);                                            
+                                                                                
+    if caf_open_retcode ^= 0 then do;                                           
+      put skip list(time() !! ' RIF0001I - E - Error opening with CAF');        
+      put skip list(time() !! ' RIF0001I - E - CAF retcode  : '                 
+                 !! trim(caf_open_retcode));                                    
+      put skip list(time() !! ' RIF0001I - E - CAF reascode : '                 
+                 !! trim(hex(caf_open_reascode)));                              
+      call endpli;                                                              
+    end;                                                                        
+                                                                                
+    exec sql set current package path = 'RIF';                                  
+    call checkSql('Set package path.',csql_end);                                
+  end opencaf;                                                                  
+                                                                                
+                                                                                
+  /********************************************************************/        
+  /* Close the connection to Db2.                                     */        
+  /********************************************************************/        
+  closecaf: procedure;                                                          
+    /* Close CAF connection.                                          */        
+    dcl 1 caf_close,                                                            
+          3 caf_close_function char(12)      init('CLOSE'),                     
+          3 caf_close_termop   char(4)       init('SYNC'),                      
+          3 caf_close_retcode  fixed bin(31) init(0),                           
+          3 caf_close_reascode char(4)       init('');                          
+                                                                                
+    call dsnali(caf_close_function,                                             
+                caf_close_termop,                                               
+                caf_close_retcode,                                              
+                caf_close_reascode);                                            
+                                                                                
+    if caf_close_retcode ^= 0 then do;                                          
+      put skip list(time() !! ' RIF0001I - E - Error closing CAF');             
+      put skip list(time() !! ' RIF0001I - E - CAF retcode : '                  
+                 !! trim(caf_close_retcode));                                   
+      put skip list(time() !! ' RIF0001I - E - CAF reascode : '                 
+                 !! trim(hex(caf_close_reascode)));                             
+      call endpli;                                                              
+    end;                                                                        
+  end closecaf;                                                                 
+                                                                                
+  /********************************************************************/        
+  /* Check the SQL code.                                              */        
+  /********************************************************************/        
+  checksql: procedure(message, severity);                                       
+    dcl message                              char(60);                          
+    dcl severity                             bin fixed(31);                     
+                                                                                
+    if(sqlcode ^= 0) then do;                                                   
+      put skip list('');                                                        
+      put skip list(time()                                                      
+                 !! ' RIF0001E - E - SQL error.');                              
+      put skip list(time()                                                      
+                 !! '              - Message : '                                
+                 !! message);                                                   
+      put skip list(time()                                                      
+                 !! '              - SQLCode : '                                
+                 !! trim(sqlcode));                                             
+                                                                                
+      if (severity = csql_crit) then do;                                        
+        put skip list(time()                                                    
+                   !! ' RIF0001I - I - Skipping this itteration.');             
+                                                                                
+        firstItteration = true;                                                 
+      end;                                                                      
+                                                                                
+      if (severity = csql_end) then call endpli();                              
+    end;                                                                        
+                                                                                
+  end checksql;                                                                 

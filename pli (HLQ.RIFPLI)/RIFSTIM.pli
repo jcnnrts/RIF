@@ -1,0 +1,22 @@
+ RIFSTIM: proc(parm_ptr);                                                       
+                                                                                
+  /********************************************************************/        
+  /* Entru to POST an ECB.                                            */        
+  /********************************************************************/        
+  dcl rifpost                         entry options(asm,inter) ext;             
+  fetch rifpost;                                                                
+                                                                                
+  define structure 1 ECB              union,                                    
+                     2 *              pointer aligned,                          
+                     2 contents       char(4);                                  
+                                                                                
+  dcl parm_ptr                        pointer byvalue;                          
+  dcl 1 RIFSTIMParmlist               based(parm_ptr),                          
+        2 waitTime                    bin fixed(31,0),                          
+        2 ECB                         type ECB;                                 
+                                                                                
+                                                                                
+  delay(waitTime);                                                              
+                                                                                
+  call rifpost(addr(RIFSTIMParmList.ECB));                                      
+ end RIFSTIM;                                                                   

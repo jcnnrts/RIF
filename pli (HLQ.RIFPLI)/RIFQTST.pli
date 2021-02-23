@@ -1,0 +1,325 @@
+  /********************************************************************/
+  /* Process the qtst subrecord.                                      */
+  /********************************************************************/
+  processqtst: procedure;
+    dcl base                               pointer;
+    base = ifi_base + smf_base->qws1.qws10r2o;
+
+    if (debug_mode = '1'b) then do;
+      put skip list('');
+      put skip list(time()
+                 !! ' RIF0001I - I - QTST.');
+
+      put skip list(time()
+                 !! ' RIF0001I - I - qws1.qws10r2o : '
+                 !! trim(smf_base->qws1.qws10r2o));
+      put skip list(time()
+                 !! ' RIF0001I - I - qws1.qws10r2l : '
+                 !! trim(smf_base->qws1.qws10r2l));
+      put skip list(time()
+                 !! ' RIF0001I - I - qws1.qws10r2n : '
+                 !! trim(smf_base->qws1.qws10r2n));
+    end;
+
+    if (firstItteration = false
+      & gather_QTST     = '1'b) then do;
+      /* Calculate the delta between the newly fetched IFI record and */
+      /* the saved previous itteration.                               */
+
+      ins_qtst.qtauchk     = base->qtst.qtauchk  - saved_qtst.qtauchk;
+      ins_qtst.qtausuc     = base->qtst.qtausuc  - saved_qtst.qtausuc;
+      ins_qtst.qtalloca    = base->qtst.qtalloca - saved_qtst.qtalloca;
+      ins_qtst.qtalloc     = base->qtst.qtalloc  - saved_qtst.qtalloc;
+      ins_qtst.qtpkalla    = base->qtst.qtpkalla - saved_qtst.qtpkalla;
+      ins_qtst.qtpkall     = base->qtst.qtpkall  - saved_qtst.qtpkall;
+      ins_qtst.qtpacaut    = base->qtst.qtpacaut - saved_qtst.qtpacaut;
+      ins_qtst.qtpacpub    = base->qtst.qtpacpub - saved_qtst.qtpacpub;
+      ins_qtst.qtpacnot    = base->qtst.qtpacnot - saved_qtst.qtpacnot;
+      ins_qtst.qtracaut    = base->qtst.qtracaut - saved_qtst.qtracaut;
+      ins_qtst.qtracpub    = base->qtst.qtracpub - saved_qtst.qtracpub;
+      ins_qtst.qtracnot    = base->qtst.qtracnot - saved_qtst.qtracnot;
+
+      ins_qtst.qtdsdrn     = base->qtst.qtdsdrn  - saved_qtst.qtdsdrn;
+      ins_qtst.qtpcct      = base->qtst.qtpcct   - saved_qtst.qtpcct;
+
+      /* No need for delta here */
+      ins_qtst.qtdsopn     = base->qtst.qtdsopn;
+      ins_qtst.qtslwdd     = base->qtst.qtslwdd;
+
+      exec sql
+        insert into RIF.ifcid_0002_service_controller
+              (insert_ts
+              ,unix_time
+              ,subsystem
+              ,qtauchk
+              ,qtausuc
+              ,qtalloca
+              ,qtalloc
+              ,qtpkalla
+              ,qtpkall
+              ,qtpacaut
+              ,qtpacpub
+              ,qtpacnot
+              ,qtracaut
+              ,qtracpub
+              ,qtracnot
+              ,qtdsopn
+              ,qtslwdd
+              ,qtdsdrn
+              ,qtpcct
+              )
+        values(current timestamp
+              ,:current_unix_time
+              ,:admin_info_ssid.subsystem_name
+              ,:ins_qtst.qtauchk
+              ,:ins_qtst.qtausuc
+              ,:ins_qtst.qtalloca
+              ,:ins_qtst.qtalloc
+              ,:ins_qtst.qtpkalla
+              ,:ins_qtst.qtpkall
+              ,:ins_qtst.qtpacaut
+              ,:ins_qtst.qtpacpub
+              ,:ins_qtst.qtpacnot
+              ,:ins_qtst.qtracaut
+              ,:ins_qtst.qtracpub
+              ,:ins_qtst.qtracnot
+              ,:ins_qtst.qtdsopn
+              ,:ins_qtst.qtslwdd
+              ,:ins_qtst.qtdsdrn
+              ,:ins_qtst.qtpcct
+              );
+
+      call checksql('Insert QTST',csql_warn);
+    end;
+
+    /* Save the current version for comparison in the next itteration.*/
+    saved_qtst = base->qtst;
+  end processqtst;
+
+  /********************************************************************/
+  /* qtst based version                                               */
+  /********************************************************************/
+  dcl 1 qtst based,               /* table of scc counters          */
+        2 qthead,                 /* control block header           */
+          3 qtidlen,               /* block id and length           */
+            4 qtid     char(2),   /* control block id               */
+            4 qtlen    bin fixed(15), /* control block length       */
+          3 qteye    char(4),     /* control block eye catcher      */
+        2 qtstats,                /* statistics                     */
+          3 qtalloca bin fixed(31), /* allocation attempts          */
+          3 qtalloc  bin fixed(31), /* successful allocations       */
+          3 qtabinda bin fixed(31), /* automatic bind attempts      */
+          3 qtabind  bin fixed(31), /* successful automatic binds   */
+          3 qtinvrid bin fixed(31), /* invalid resource-ids         */
+          3 qtbinda  bin fixed(31), /* bind (add) sub-commands      */
+          3 qtbindr  bin fixed(31), /* bind (replace) sub-commands  */
+          3 qttestb  bin fixed(31), /* test binds (no plan-id)      */
+          3 qtplnbd  bin fixed(31), /* plans bound                  */
+          3 qtrebind bin fixed(31), /* rebind sub-commands          */
+          3 qtrbinda bin fixed(31), /* attempts to rebind a plan    */
+          3 qtplnrbd bin fixed(31), /* plans rebound                */
+          3 qtfree   bin fixed(31), /* free sub-commands            */
+          3 qtfreea  bin fixed(31), /* attempts to free a plan      */
+          3 qtplnfrd bin fixed(31), /* plans freed                  */
+          3 qtauchk  bin fixed(31), /* total number of authorization */
+                                  /*  checks                        */
+          3 qtausuc  bin fixed(31), /* total number of successful   */
+                                  /*  authorization checks          */
+          3 qtdsopn  bin fixed(31), /* number of datasets currently */
+                                  /*   open                         */
+          3 qtmaxds  bin fixed(31), /* maximum number of datasets ever*/
+                                  /*   opened concurrently          */
+          3 qtaucch  bin fixed(31), /* # successful auth checks for */
+                                  /*  plans using a plan cache or   */
+                                  /*  public auth check (qtaupub)   */
+          3 qtaupub  bin fixed(31), /* # successful auth checks for */
+                                  /* plan execute authority held by */
+                                  /* public                         */
+          3 qtmaxpb  bin fixed(31), /* maximum not in-use data sets */
+                                  /* last sub-bro                   */
+          3 qtpacaut bin fixed(31), /* # successful auth checks for */
+                                  /*  packages using the package    */
+                                  /*  auth cache-- includes public  */
+                                  /*  auth checks (qtpacpub)        */
+          3 qtpacpub bin fixed(31), /* # successful auth checks for */
+                                  /*  package execute authority     */
+                                  /*  held by public                */
+          3 qtpacnot bin fixed(31), /* # package auth checks that   */
+                                  /*  could not make use of the     */
+                                  /*  package auth cache            */
+          3 qtreopn  bin fixed(31), /* # of times that not in-use open*/
+                                  /* data sets became in-use        */
+          3 qtpacow1 bin fixed(31), /* overwrote an authid in cache */
+          3 qtpacow2 bin fixed(31), /* overwrote pkg entry in cache */
+          3 *        char(4),     /* ++ reserved                    */
+          3 qtdsdrn  bin fixed(31), /* # of not in-use data sets    */
+                                  /* closed due to dsmax/dd limit   */
+          3 qtpcct   bin fixed(31), /* # of infrequently updated data */
+                                  /* sets that are converted from   */
+                                  /* r/w to r/o state (i.e. pseudo  */
+                                  /* close                          */
+          3 qtslwdd  bin fixed(31), /* # of data sets that are not  */
+                                  /* in-use, but are not closed     */
+          3 qtbindpa bin fixed(31), /* bind (add) package sub-commands*/
+          3 qtbindpr bin fixed(31), /* bind (rep) package sub-commands*/
+          3 qtpkgbd  bin fixed(31), /* packages bound               */
+          3 qtrbindp bin fixed(31), /* rebind package sub-commands  */
+          3 qtrbndpa bin fixed(31), /* attempts to rebind a package */
+          3 qtpkgrbd bin fixed(31), /* packages rebound             */
+          3 qtfreep  bin fixed(31), /* free package sub-commands    */
+          3 qtfreeap bin fixed(31), /* attempts to free a package   */
+          3 qtpkgfrd bin fixed(31), /* packages freed               */
+          3 qtautoba bin fixed(31), /* attempts to autobind a package */
+          3 qtpkabnd bin fixed(31), /* packages autobound           */
+          3 qtpkalla bin fixed(31), /* attempts to allocate a package */
+          3 qtpkall  bin fixed(31), /* packages allocated           */
+          3 *        char(12),    /* ++ reserved                    */
+          3 qtracaut bin fixed(31), /* # successful auth checks for */
+                                  /*  routines using the routine    */
+                                  /*  auth cache-- includes public  */
+                                  /*  auth checks (qtracpub)        */
+          3 qtracpub bin fixed(31), /* # successful auth checks for */
+                                  /*  routine execute authority     */
+                                  /*  held by public                */
+          3 qtracnot bin fixed(31), /* # routine auth checks that   */
+                                  /*  could not make use of the     */
+                                  /*  routine auth cache            */
+          3 qtracow1 bin fixed(31), /* overwrote an authid in cache */
+          3 qtracow2 bin fixed(31), /* overwrote rtn entry in cache */
+          3 qtracnac bin fixed(31), /* not able to add rtn to cache */
+          3 *        char(32),    /* ++ reserved                    */
+        2 qtstend  char(0);       /* end of scc statistics block    */
+
+
+  /********************************************************************/
+  /* qtst saved version                                               */
+  /********************************************************************/
+  dcl 1 saved_qtst,
+        2 qthead,
+          3 qtidlen,
+            4 qtid     char(2),
+            4 qtlen    bin fixed(15),
+          3 qteye      char(4),
+        2 qtstats,
+          3 qtalloca   bin fixed(31),
+          3 qtalloc    bin fixed(31),
+          3 qtabinda   bin fixed(31),
+          3 qtabind    bin fixed(31),
+          3 qtinvrid   bin fixed(31),
+          3 qtbinda    bin fixed(31),
+          3 qtbindr    bin fixed(31),
+          3 qttestb    bin fixed(31),
+          3 qtplnbd    bin fixed(31),
+          3 qtrebind   bin fixed(31),
+          3 qtrbinda   bin fixed(31),
+          3 qtplnrbd   bin fixed(31),
+          3 qtfree     bin fixed(31),
+          3 qtfreea    bin fixed(31),
+          3 qtplnfrd   bin fixed(31),
+          3 qtauchk    bin fixed(31),
+          3 qtausuc    bin fixed(31),
+          3 qtdsopn    bin fixed(31),
+          3 qtmaxds    bin fixed(31),
+          3 qtaucch    bin fixed(31),
+          3 qtaupub    bin fixed(31),
+          3 qtmaxpb    bin fixed(31),
+          3 qtpacaut   bin fixed(31),
+          3 qtpacpub   bin fixed(31),
+          3 qtpacnot   bin fixed(31),
+          3 qtreopn    bin fixed(31),
+          3 qtpacow1   bin fixed(31),
+          3 qtpacow2   bin fixed(31),
+          3 *          char(4),
+          3 qtdsdrn    bin fixed(31),
+          3 qtpcct     bin fixed(31),
+          3 qtslwdd    bin fixed(31),
+          3 qtbindpa   bin fixed(31),
+          3 qtbindpr   bin fixed(31),
+          3 qtpkgbd    bin fixed(31),
+          3 qtrbindp   bin fixed(31),
+          3 qtrbndpa   bin fixed(31),
+          3 qtpkgrbd   bin fixed(31),
+          3 qtfreep    bin fixed(31),
+          3 qtfreeap   bin fixed(31),
+          3 qtpkgfrd   bin fixed(31),
+          3 qtautoba   bin fixed(31),
+          3 qtpkabnd   bin fixed(31),
+          3 qtpkalla   bin fixed(31),
+          3 qtpkall    bin fixed(31),
+          3 *          char(12),
+          3 qtracaut   bin fixed(31),
+          3 qtracpub   bin fixed(31),
+          3 qtracnot   bin fixed(31),
+          3 qtracow1   bin fixed(31),
+          3 qtracow2   bin fixed(31),
+          3 qtracnac   bin fixed(31),
+          3 *          char(32),
+        2 qtstend      char(0);
+
+
+  /********************************************************************/
+  /* qtst version for inserting                                       */
+  /********************************************************************/
+  dcl 1 ins_qtst,
+        2 qthead,
+          3 qtidlen,
+            4 qtid     char(2),
+            4 qtlen    bin fixed(15),
+          3 qteye      char(4),
+        2 qtstats,
+          3 qtalloca   bin fixed(31),
+          3 qtalloc    bin fixed(31),
+          3 qtabinda   bin fixed(31),
+          3 qtabind    bin fixed(31),
+          3 qtinvrid   bin fixed(31),
+          3 qtbinda    bin fixed(31),
+          3 qtbindr    bin fixed(31),
+          3 qttestb    bin fixed(31),
+          3 qtplnbd    bin fixed(31),
+          3 qtrebind   bin fixed(31),
+          3 qtrbinda   bin fixed(31),
+          3 qtplnrbd   bin fixed(31),
+          3 qtfree     bin fixed(31),
+          3 qtfreea    bin fixed(31),
+          3 qtplnfrd   bin fixed(31),
+          3 qtauchk    bin fixed(31),
+          3 qtausuc    bin fixed(31),
+          3 qtdsopn    bin fixed(31),
+          3 qtmaxds    bin fixed(31),
+          3 qtaucch    bin fixed(31),
+          3 qtaupub    bin fixed(31),
+          3 qtmaxpb    bin fixed(31),
+          3 qtpacaut   bin fixed(31),
+          3 qtpacpub   bin fixed(31),
+          3 qtpacnot   bin fixed(31),
+          3 qtreopn    bin fixed(31),
+          3 qtpacow1   bin fixed(31),
+          3 qtpacow2   bin fixed(31),
+          3 *          char(4),
+          3 qtdsdrn    bin fixed(31),
+          3 qtpcct     bin fixed(31),
+          3 qtslwdd    bin fixed(31),
+          3 qtbindpa   bin fixed(31),
+          3 qtbindpr   bin fixed(31),
+          3 qtpkgbd    bin fixed(31),
+          3 qtrbindp   bin fixed(31),
+          3 qtrbndpa   bin fixed(31),
+          3 qtpkgrbd   bin fixed(31),
+          3 qtfreep    bin fixed(31),
+          3 qtfreeap   bin fixed(31),
+          3 qtpkgfrd   bin fixed(31),
+          3 qtautoba   bin fixed(31),
+          3 qtpkabnd   bin fixed(31),
+          3 qtpkalla   bin fixed(31),
+          3 qtpkall    bin fixed(31),
+          3 *          char(12),
+          3 qtracaut   bin fixed(31),
+          3 qtracpub   bin fixed(31),
+          3 qtracnot   bin fixed(31),
+          3 qtracow1   bin fixed(31),
+          3 qtracow2   bin fixed(31),
+          3 qtracnac   bin fixed(31),
+          3 *          char(32),
+        2 qtstend      char(0);
+
+

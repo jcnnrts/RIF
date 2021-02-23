@@ -1,0 +1,133 @@
+  /********************************************************************/
+  /* Process the QWOS subrecord.                                      */
+  /********************************************************************/
+  processQWOS: procedure;
+    dcl base                               pointer;
+    base = ifi_base + smf_base->qws0.qws00rdo;
+
+    if (debug_mode = '1'b) then do;
+      put skip list('');
+      put skip list(time()
+                 !! ' RIF0001I - I - QWOS.');
+
+      put skip list(time()
+                 !! ' RIF0001I - I - qws0.qws00rdo : '
+                 !! trim(smf_base->qws0.qws00rdo));
+      put skip list(time()
+                 !! ' RIF0001I - I - qws0.qws00rdl : '
+                 !! trim(smf_base->qws0.qws00rdl));
+      put skip list(time()
+                 !! ' RIF0001I - I - qws0.qws00rdn : '
+                 !! trim(smf_base->qws0.qws00rdn));
+    end;
+
+    if (firstItteration = false
+      & gather_QWOS     = '1'b) then do;
+      ins_qwos = base->qwos;
+
+      exec sql
+        insert into RIF.ifcid_0001_zos_statistics
+              (insert_ts
+              ,unix_time
+              ,subsystem
+              ,qwoslncp
+              ,qwoslpru
+              ,qwosdb2u
+              ,qwosmstu
+              ,qwosdbmu
+              ,qwoslpir
+              ,qwosdpir
+              ,qwoslrst
+              ,qwoslrsf
+              ,qwosdrsu
+              ,qwoslvst
+              ,qwoslvsf
+              ,qwosdvsu
+              ,qwosluic
+              ,qwosreal
+              )
+        values(current timestamp
+              ,:current_unix_time
+              ,:admin_info_ssid.subsystem_name
+              ,:ins_qwos.qwoslncp
+              ,:ins_qwos.qwoslpru
+              ,:ins_qwos.qwosdb2u
+              ,:ins_qwos.qwosmstu
+              ,:ins_qwos.qwosdbmu
+              ,:ins_qwos.qwoslpir
+              ,:ins_qwos.qwosdpir
+              ,:ins_qwos.qwoslrst
+              ,:ins_qwos.qwoslrsf
+              ,:ins_qwos.qwosdrsu
+              ,:ins_qwos.qwoslvst
+              ,:ins_qwos.qwoslvsf
+              ,:ins_qwos.qwosdvsu
+              ,:ins_qwos.qwosluic
+              ,:ins_qwos.qwosreal
+              );
+
+      call checksql('Insert QWOS',csql_warn);
+    end;
+  end processQWOS;
+
+
+  /********************************************************************/
+  /* qwos based version                                               */
+  /********************************************************************/
+  dcl 1  qwos  based,
+      3  qwoslncp   bin fixed(31), /* no of cps on lpar              */
+      3  qwoslpru   bin fixed(31), /* cpu utilization lpar           */
+      3  qwosdb2u   bin fixed(31), /* cpu utilization db2 subsys     */
+      3  qwosmstu   bin fixed(31), /* cpu utilization db2 mstr       */
+      3  qwosdbmu   bin fixed(31), /* cpu utilization db2 dbm1       */
+      3  qwoslpir   bin fixed(31), /* page-in rate lpar              */
+      3  qwosdpir   bin fixed(31), /* page-in rate db2 subsys        */
+      3  qwoslrst   bin fixed(31), /* real storage on lpar in mb     */
+      3  qwoslrsf   bin fixed(31), /* free real storage lpar in mb   */
+      3  qwosdrsu   bin fixed(31), /* used real storage db2 mb       */
+      3  qwoslvst   bin fixed(31), /* virtual storage lpar in mb     */
+      3  qwoslvsf   bin fixed(31), /* free virtual storage lpar  mb  */
+      3  qwosdvsu   bin fixed(31), /* used virtual storage db2 mb    */
+      3  qwosluic   bin fixed(31), /* unreferenced interval count    */
+      3  qwosflg    char(1),    /* (s) status flags from rmf-api     */
+      3  qwosflg1,
+       4 qwosrealval bit(1),   /* qwosreal valid as on z/os 2.1 and  */
+                               /* above                              */
+       4 *           bit(7),   /* reserved                           */
+      3  *          char(2),    /* reserved                          */
+      3  qwosrcde   bin fixed(31), /* (s) return code from rmf-api   */
+      3  qwosrsnc   bin fixed(31), /* (s) reason code from rmf-api   */
+      3  qwosreal   bin fixed(63), /* real storage on lpar in  */
+                                /* mb when z/os v2.1 and above       */
+      3  qwosend    char(0);
+
+
+  /********************************************************************/
+  /* qwos version for inserting                                       */
+  /********************************************************************/
+  dcl 1  ins_qwos,
+      3  qwoslncp   bin fixed(31),
+      3  qwoslpru   bin fixed(31),
+      3  qwosdb2u   bin fixed(31),
+      3  qwosmstu   bin fixed(31),
+      3  qwosdbmu   bin fixed(31),
+      3  qwoslpir   bin fixed(31),
+      3  qwosdpir   bin fixed(31),
+      3  qwoslrst   bin fixed(31),
+      3  qwoslrsf   bin fixed(31),
+      3  qwosdrsu   bin fixed(31),
+      3  qwoslvst   bin fixed(31),
+      3  qwoslvsf   bin fixed(31),
+      3  qwosdvsu   bin fixed(31),
+      3  qwosluic   bin fixed(31),
+      3  qwosflg    char(1),
+      3  qwosflg1,
+       4 qwosrealval bit(1),
+       4 *           bit(7),
+      3  *          char(2),
+      3  qwosrcde   bin fixed(31),
+      3  qwosrsnc   bin fixed(31),
+      3  qwosreal   bin fixed(63),
+      3  qwosend    char(0);
+
+

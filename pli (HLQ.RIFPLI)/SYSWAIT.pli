@@ -1,0 +1,110 @@
+ /**********************************************************************        
+ * Date       ! By     ! Summary of changes                            *        
+ *------------+--------+-----------------------------------------------*        
+ * 2016-03-08 ! TSATJA ! Virgin comment box added                      *        
+ ***********************************************************************        
+ *                                                                     *        
+ *                        PLEASE READ                                  *        
+ *                                                                     *        
+ * Before using this book, please contact the developer.               *        
+ *                                                                     *        
+ ***********************************************************************        
+ *                                                                     *        
+ * Includable book that provides you with the means to WAIT on an ECB  *        
+ * and POST an existing ECB. The WAIT/POST system exists to serialise  *        
+ * the usage of resources without wasting CPU cycles on busy loops.    *        
+ * If you do not understand why, when and how to use the WAIT/POST     *        
+ * system; don't use this technique until after you have educated      *        
+ * yourself. The z/OS Assembler Services guide can help you with this, *        
+ * as well as the developer of this book.                              *        
+ *                                                                     *        
+ ***********************************************************************        
+ *                                                                     *        
+ * To WAIT on an ECB we must first declare the ECB. We do this with    *        
+ * the user defined type that was defined in this book;                *        
+ *                                                                     *        
+ *   dcl myECB type ECB;                                               *        
+ *                                                                     *        
+ * Now we can WAIT on this ECB to be POSTed. We do this by calling the *        
+ * waitECB() procedure, while giving it our recently allocated ECB     *        
+ * type variable as a parameter;                                       *        
+ *                                                                     *        
+ *   call waitECB(myECB);                                              *        
+ *                                                                     *        
+ * From this point on the TCB of the task that issued the WAIT will    *        
+ * become indispatchable by the BCP, causing it to use no CPU until    *        
+ * the ECB it is WAITing on gets POSTed by another task. This means    *        
+ * that the task that will be POSTing the ECB must know where it       *        
+ * exists in memory!                                                   *        
+ *                                                                     *        
+ * To POST an ECB, call the postECB() procedure, and give it the ECB   *        
+ * that was previously declared. Chances are that the ECB that is to   *        
+ * be posted will one way or another be based on an address that was   *        
+ * passed from the WAITing task (before it started waiting) to the     *        
+ * POSTing task, as the WAITing task will never be able to POST its    *        
+ * own ECB, considering that it is WAITing.                            *        
+ *                                                                     *        
+ *   call postECB(myECB);                                              *        
+ *                                                                     *        
+ * At this point the WAITing task will 'wake up' and continue          *        
+ * processing. The ECB is reusable when used by the procedures in this *        
+ * book (it needs to be cleaned up before use, which the waitECB()     *        
+ * procedure does automatically).                                      *        
+ *                                                                     *        
+ ***********************************************************************        
+                                                                                
+ /*********************************************************************/        
+ /* Entries to WAIT and POST assembler wrapper modules.               */        
+ /*********************************************************************/        
+ dcl rifwait   /* WAIT */            entry options(asm,inter) ext;              
+ dcl rifpost   /* POST */            entry options(asm,inter) ext;              
+                                                                                
+ fetch rifwait;                                                                 
+ fetch rifpost;                                                                 
+                                                                                
+ /*********************************************************************/        
+ /* User defined type for an ECB.                                     */        
+ /*                                                                   */        
+ /* We UNIONise with a pointer to force fullword alignment. An ECB    */        
+ /* needs to be fullword alligned, and PL/1 will never fullword       */        
+ /* align a character type.                                           */        
+ /*********************************************************************/        
+ define structure 1 ECB              union,                                     
+                    2 *              pointer aligned,                           
+                    2 contents       char(4);                                   
+                                                                                
+ /*********************************************************************/        
+ /* WAIT for an ECB to be posted.                                     */        
+ /*********************************************************************/        
+ /*                                                                             
+ /* rifwait has been rewritten to wait on ECB lists, so single ECB              
+ /* waits are not supported for now                                             
+ /*                                                                             
+ waitECBList: proc(ECBList) reorder;                                            
+   dcl ECBList                       pointer byaddr;                            
+                                                                                
+   call rifwait(addr(ECBList));                                                 
+ end;                                                                           
+ */                                                                             
+                                                                                
+ /*********************************************************************/        
+ /* Clear an ECB and make it ready for use again.                     */        
+ /*********************************************************************/        
+ clearECB: proc(iECB) reorder;                                                  
+   dcl iECB                          type ECB byaddr;                           
+                                                                                
+   iECB.contents = '00000000'x;                                                 
+ end;                                                                           
+                                                                                
+ /*********************************************************************/        
+ /* POST an ECB that someone is WAITing on.                           */        
+ /*********************************************************************/        
+ /*                                                                             
+ /* RIF doesn't have to POST an EBC.                                            
+ /*                                                                             
+ postECB: proc(iECB) reorder;                                                   
+   dcl iECB                          type ECB byaddr;                           
+                                                                                
+   call rifpost(addr(iECB));                                                    
+ end;                                                                           
+ */                                                                             

@@ -1,0 +1,469 @@
+ RIFMAIN: proc options(main);
+
+  /* Define some stuff.                                               */
+  dcl sysprint                     file output;
+  dcl hex                          builtin;
+  dcl time                         builtin;
+
+  dcl true                         bin fixed(31) init(1);
+  dcl false                        bin fixed(31) init(0);
+
+  /* We don't save the first itteration (need to compare previous to  */
+  /* current values to get an absolute value.)                        */
+  /* In case of failure in ADMIN_INFO_IFCID, we do the same thing,    */
+  /* so we don't get a case of saving values that are the sum of two  */
+  /* minutes worth of statistics data.                                */
+  /* ADMIN_INFO_IFCID can fail if there is not enough workfile        */
+  /* database space to fill its CGTT that is used to pass results     */
+  /* to the caller.                                                   */
+  dcl firstItteration              bin fixed(31);
+  firstItteration = true;
+
+  /* Be able to ATTACH.                                               */
+  dcl plixopt char(9) var init('POSIX(ON)') static external;
+  dcl timerThread                  task;
+
+  /********************************************************************/
+  /* Ability to perform some system stuff.                           */
+  /********************************************************************/
+  %include incdd(rifcmnd);
+  %include incdd(syswait);
+
+
+  /********************************************************************/
+  /* Db2 connectivity.                                               */
+  /********************************************************************/
+  %include incdd(rifdb2);
+
+
+  /********************************************************************/
+  /* ADMIN_INFO_SSID StorProc call.                                  */
+  /********************************************************************/
+  dcl 1 admin_info_ssid,
+      2 subsystem_name             char(4),
+      2 retcd                      bin fixed(31,0),
+      2 retcd_i                    bin fixed(15,0) init(-1),
+      2 errmsg                     char(1331) varying,
+      2 errmsg_i                   bin fixed(15,0) init(-1);
+
+
+  /********************************************************************/
+  /* IFI SP call                                                     */
+  /********************************************************************/
+  dcl 1 admin_info_ifcid,
+      2 retcd                      bin fixed(31,0),
+      2 retcd_i                    bin fixed(15,0) init(-1),
+      2 errmsg                     char(1331) varying,
+      2 errmsg_i                   bin fixed(15,0) init(-1),
+      2 db2mem                     char(8) varying init(''),
+      2 db2mem_i                   bin fixed(15,0) init(-1);
+
+  dcl 1 admin_info_ifcid_rs,
+      2 rowid                      bin fixed(31,0),
+      2 ifirec                     char(32000) varying;
+
+  dcl rs_loc1                      sql type is RESULT_SET_LOCATOR;
+
+
+  /********************************************************************/
+  /* Base offsets for the IFI records.                                */
+  /********************************************************************/
+  dcl ifi_base                     pointer;
+  dcl smf_base                     pointer;
+  ifi_base = addr(ifirec) + 2;     /* +2 to get rid of varchar length */
+  smf_base = addr(ifirec) + 6;     /* +2 to get rid of varchar length */
+                                   /* +4 to skip over IFCID length    */
+
+
+  /********************************************************************/
+  /* Random stuff we need.                                            */
+  /********************************************************************/
+  dcl current_unix_time            bin fixed(63);
+  dcl save_timestamp               char(26);
+
+
+  /********************************************************************/
+  /* Stuff to be able to WAIT on other stuff.                         */
+  /********************************************************************/
+  dcl RIFSTIM                      entry(pointer byvalue) external;
+
+  dcl 1 RIFSTIMParmlist,
+        2 waitTime                 bin fixed(31,0),
+        2 ECB                      type ECB;
+
+
+  /* Will get POSTed if a stop command comes through.                 */
+  /* Need as char to do bitwise OR to turn high bit on and mark it as */
+  /* last ECB in the ECBLIST for the WAIT.                            */
+  dcl STOPECB                      type ECB;
+  dcl highBit                      bit(32)
+                            init('10000000000000000000000000000000'b);
+
+  dcl 1 * union,
+        2 STOPECBAddr              pointer init(addr(STOPECB)),
+        2 STOPECBAddrAsBits        bit(32);
+
+  /* Pre-clear ECBs.                                                  */
+  call clearECB(RIFSTIMParmlist.ECB);
+  call clearECB(STOPECB);
+
+  /* ECBLIST that we wait on every main loop itteration.              */
+  /*  1st ECB -> Is POSTed after an STIMER routine has fired.         */
+  /*             This wakes us up every minute to do work.            */
+  /*  2nd ECB -> Is POSTed by a subtask that itself is WAITing for a  */
+  /*             stop command from the console.                       */
+  /* Last Pointer in the list must have high bit set to 1 to mark end.*/
+  dcl ECBPtrList(2)                pointer aligned;
+
+  STOPECBAddrAsBits = STOPECBAddrAsBits ! highBit;
+  ECBPtrList(1)     = addr(RIFSTIMParmlist.ECB);
+  ECBPtrList(2)     = STOPECBAddr;
+
+  /********************************************************************/
+  /* RIFOPT options.                                                  */
+  /********************************************************************/
+  %include incdd(RIFOPTS);
+
+  /********************************************************************/
+  /* Mappings for all the IFCIDs we're interested in.                 */
+  /********************************************************************/
+  %include incdd(DSNQWS0);      /* Index for IFCID 1 subrecords       */
+  %include incdd(DSNQWS1);      /* Index for IFCID 2 subrecords       */
+  %include incdd(DSNQW03);      /* Index for IFCID 201 - 249 subrecrds*/
+
+  /* Individual procedures to process each subtype.                   */
+  %include incdd(RIFQWSA);
+  %include incdd(RIFQJST);
+  %include incdd(RIFQWOS);
+  /*%include incdd(RIFQVLS);*/
+
+
+  %include incdd(RIFQ8ST);
+  %include incdd(RIFQBST);
+  %include incdd(RIFQIST);
+  /* %include incdd(RIFQISE); */
+  %include incdd(RIFQBGL);
+  %include incdd(RIFQTXA);
+  %include incdd(RIFQTGS);
+  /* %include incdd(RIFQXCA); */
+  %include incdd(RIFQTST);
+  %include incdd(RIFQXST);
+
+
+  %include incdd(RIFQ2251);
+  /*%include incdd(RIFQ2252);*/
+  /*%include incdd(RIFQ2253);*/
+  /*%include incdd(RIFQ2254);*/
+  /*%include incdd(RIFQ2255);*/
+  /*%include incdd(RIFQ2256);*/
+
+
+
+  /********************************************************************/
+  /* Main procedure.                                                   /
+  /********************************************************************/
+  call mainproc;
+  mainproc: procedure;
+    put skip list(time() !! ' RIF0001I - I - RIF V0R1');
+    display('RIF0001I - RIF IS STARTING');
+
+    call readOptions();
+
+    call opencaf();
+
+    call getLocalDb2SSID();
+
+    call listenForStop(STOPECB);
+
+    call saveStartTime();
+
+    display('RIF0099I - RIF IS STARTED');
+    put skip list(time() !! ' RIF0099I - I - RIF is started.');
+    put skip list(time() !! ' RIF0001I - I - RIF is gathering data.');
+
+
+    /* Main work loop.                                                */
+    do while(comnd_commarea.shutdown = 'N');
+      call getCurrentUnixTime();
+
+      call processIFCID0001();
+      call processIFCID0002();
+      call processIFCID0225();
+      call processDisplayBP();
+
+      call waitForNextTrigger();
+
+      firstItteration = false;
+    end;
+
+
+    put skip list('');
+    put skip list(time()
+               !! ' RIF0001I - I - RIF is shutting down.');
+    display('RIF0001I - RIF IS SHUTTING DOWN');
+
+    call closecaf();
+  end mainproc;
+
+
+  /********************************************************************/
+  /* Process IFCID 0001                                                /
+  /********************************************************************/
+  processIFCID0001: procedure;
+    call getIFI(1);         /* Read the IFI 1 record using SP.        */
+
+    call processQWSA();     /* Address space CPU usage.               */
+    call processQJST();     /* Log manager data.                      */
+    call processQWOS();     /* z/OS statistics data.                  */
+  /*call processQVLS();     /* Latches.                               */
+
+    exec sql commit;
+  end processIFCID0001;
+
+
+  /********************************************************************/
+  /* Process IFCID 0002                                                /
+  /********************************************************************/
+  processIFCID0002: procedure;
+    call getIFI(2);         /* Read the IFI 2 record using SP.        */
+
+    call processQ8ST();     /* IDAA data                              */
+    call processQIST();     /* Data manager data                      */
+  /*call processQISE();     /* EDM pool data                          */
+    call processQBST();     /* Buffer pool activity                   */
+    call processQBGL();     /* Group buffer pool activity data        */
+    call processQTXA();     /* Local locking data                     */
+    call processQTGS();     /* Data sharing locking data              */
+  /*call processQXCA();     /* Nested SQL activity                    */
+    call processQTST();     /* Service controller data                */
+    call processQXST();     /* SQL Call data                          */
+
+    exec sql commit;
+  end processIFCID0002;
+
+  /********************************************************************/
+  /* Process IFCID 0225                                                /
+  /********************************************************************/
+  processIFCID0225: procedure;
+    call getIFI(225);       /* Read the IFI 225 record using SP.      */
+
+    call processQW02251();  /* Address space information.             */
+  /*call processQW02252();  /* Thread information.                    */
+  /*call processQW02253();  /* Shared and Common Storage Summary.     */
+  /*call processQW02254();  /* Statement Cache.                       */
+  /*call processQW02255();  /* Pool Details.                          */
+  /*call processQW02256();  /* IRLM pool information.                 */
+
+    exec sql commit;
+  end processIFCID0225;
+
+  /********************************************************************/
+  /* Process Display Bufferpool                                        /
+  /********************************************************************/
+  processDisplayBP: procedure;
+    call getDBP();          /* Perform a "display bufferpool".        */
+
+    call processDBP();      /* Process the output of "display bp".    */
+
+    exec sql commit;
+  end processDisplayBP;
+
+  /********************************************************************/
+  /* Read an IFI record using ADMIN_INFO_IFCID.                        /
+  /********************************************************************/
+  getIFI: procedure(ifcid_nr);
+    dcl ifcid_nr                  bin fixed(31);
+
+    exec sql
+      call SYSPROC.ADMIN_INFO_IFCID(:ifcid_nr
+                                   ,:admin_info_ifcid.db2mem
+                                    :admin_info_ifcid.db2mem_i
+                                   ,:admin_info_ifcid.retcd
+                                    :admin_info_ifcid.retcd_i
+                                   ,:admin_info_ifcid.errmsg
+                                    :admin_info_ifcid.errmsg_i);
+
+    if (sqlcode ^= 466) then do;
+      call checkSql('Call ADMIN_INFO_IFCID',csql_crit);
+    end;
+
+    if (admin_info_ifcid.retcd ^= 0) then do;
+      put skip list(time()
+                 !! ' RIF0001I - I - SP retcode : '
+                 !! trim(admin_info_ifcid.retcd));
+      put skip list(time()
+                 !! ' RIF0001I - I - SP message : '
+                 !! admin_info_ifcid.errmsg);
+
+      call endpli();
+    end;
+
+    exec sql
+      associate locators (:rs_loc1)
+      with procedure SYSPROC.ADMIN_INFO_IFCID;
+
+    call checkSql('Associate',csql_crit);
+
+    exec sql
+      allocate c1 cursor for result set :rs_loc1;
+
+    call checkSql('Allocate',csql_crit);
+
+    exec sql
+      fetch c1 into :admin_info_ifcid_rs.rowid
+                   ,:admin_info_ifcid_rs.ifirec;
+
+    exec sql close c1;
+
+    /* Dump the IFCID in a super cool hex format like IPCS            */
+
+    if (debug_mode = '1'b) then do;
+      dcl i                               bin fixed(31,0);
+      dcl lines                           bin fixed(31,0);
+
+
+      lines = length(ifirec) / 16;
+
+      put skip list('');
+      put skip list(time()
+                 !! ' RIF0001I - I - Hex dump for IFI record #'
+                 !! trim(ifcid_nr)
+                 !! ' length '
+                 !! trim(length(ifirec)));
+
+      put skip list('');
+
+
+      put skip list('                       '
+                 !! 'Offset     0        4        8        C       ');
+      do i = 1 to lines;
+        put skip list(time()
+                   !! '           '
+                   !! '   '
+                   !! hex((i*16)-16)
+                   !! '   '
+                   !! hex(substr(ifirec,((i*16)-16)+1 , 4))
+                   !! ' '
+                   !! hex(substr(ifirec,((i*16)-16)+5 , 4))
+                   !! ' '
+                   !! hex(substr(ifirec,((i*16)-16)+9 , 4))
+                   !! ' '
+                   !! hex(substr(ifirec,((i*16)-16)+13 , 4))
+                   !! '   >'
+                   !! substr(ifirec,((i*16)-16)+1, 16)
+                   !! '<');
+      end;
+
+      put skip list('');
+    end;
+
+
+  end getIFI;
+
+  /********************************************************************/
+  /* Get the current time in unix epoch format (grafana default).     */
+  /********************************************************************/
+  getCurrentUnixTime: procedure;
+    exec sql
+      select (86400*(
+             cast(days(current timestamp - current timezone) as bigint)
+             - days('1970-01-01'))
+             + midnight_seconds(current timestamp - current timezone))
+             * 1000
+        into :current_unix_time
+        from sysibm.sysdummy1;
+
+    call checkSQL('Get unix time',csql_crit);
+
+    if (debug_mode = '1'b) then do;
+      put skip list(time()
+                 !! ' RIF0001I - I - unix time is '
+                 !! trim(current_unix_time));
+    end;
+  end getCurrentUnixTime;
+
+
+  /********************************************************************/
+  /* Perform a display bufferpool.                                    */
+  /********************************************************************/
+  getDBP: procedure;
+  end getDBP;
+
+  /********************************************************************/
+  /* Perform a display bufferpool.                                    */
+  /********************************************************************/
+  processDBP: procedure;
+  end processDBP;
+
+
+  /********************************************************************/
+  /* Get the SSID of the Db2 we're connected to.                      */
+  /********************************************************************/
+  getLocalDb2SSID: procedure;
+    exec sql
+      call SYSPROC.ADMIN_INFO_SSID(:admin_info_ssid.subsystem_name
+                                  ,:admin_info_ssid.retcd
+                                   :admin_info_ssid.retcd_i
+                                  ,:admin_info_ssid.errmsg
+                                   :admin_info_ssid.errmsg_i);
+
+    put skip list(time()
+               !! ' RIF0001I - I - Connected Db2 subsystem is '
+               !! admin_info_ssid.subsystem_name);
+
+  end getLocalDb2SSID;
+
+
+  /********************************************************************/
+  /* Save the start time so we can always skip ahead a full minute,   */
+  /* and no a minute + itteration processing time.                    */
+  /********************************************************************/
+  saveStartTime: procedure;
+
+    exec sql
+      select current timestamp + 1 minute
+        into :save_timestamp
+        from sysibm.sysdummy1;
+
+  end saveStartTime;
+
+  /********************************************************************/
+  /* Calculate how to long to wait until the next minute, and         */
+  /* that amount of time.                                             */
+  /********************************************************************/
+  waitForNextTrigger: procedure;
+    dcl waitTime                   bin fixed(31,0);
+
+
+    exec sql
+      select timestamp(:save_timestamp) + 1 minute
+             ,cast(((timestamp(:save_timestamp)
+                   - current_timestamp) * 1000) as int)
+        into :save_timestamp
+            ,:waitTime
+        from sysibm.sysdummy1;
+
+
+    /* Call RIFSTIM to wait until next interval.                      */
+    call clearECB(RIFSTIMParmlist.ECB);
+    RIFSTIMParmList.waitTime = waitTime;
+    attach RIFSTIM(addr(RIFSTIMParmList)) thread(timerThread);
+
+
+    /* Wait on either the command ECB or timer ECB to be posted.      */
+    call rifwait(addr(ECBPtrList));
+    detach thread(timerThread);
+  end waitForNextTrigger;
+
+
+  /********************************************************************/
+  /* End program prematurely.                                         */
+  /********************************************************************/
+  endpli: procedure;
+    put skip list('');
+    put skip list('RIF0001I - I - RIF ending.');
+    goto quit;
+  end endpli;
+
+  quit:
+ end RIFMAIN;

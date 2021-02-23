@@ -1,0 +1,55 @@
+   dcl 1  qws1  based,                                                          
+  /*  product section for data base statistics contains the                     
+      standard header mapped by dsndqwhs */                                     
+       3  qws10pso   bin fixed(31), /*offset to the product section */          
+       3  qws10psl   bin fixed(15), /*length of the product section */          
+       3  qws10psn   bin fixed(15), /*number of product sections*/              
+  /* for rmid 22    mapped by dsndqxst     sql          */                      
+       3  qws10r1o   bin fixed(31), /*offset to the data section    */          
+       3  qws10r1l   bin fixed(15), /*length of the data section */             
+       3  qws10r1n   bin fixed(15), /*number of data sections*/                 
+  /* for rmid 20    mapped by dsndqtst       bind   */                          
+       3  qws10r2o   bin fixed(31), /*offset to the data section    */          
+       3  qws10r2l   bin fixed(15), /*length of the data section */             
+       3  qws10r2n   bin fixed(15), /*number of data sections*/                 
+  /* for rmid 10    mapped by dsndqbst    buffer manager     */                 
+       3  qws10r3o   bin fixed(31), /*offset to the data section    */          
+       3  qws10r3l   bin fixed(15), /*length of the data section */             
+       3  qws10r3n   bin fixed(15), /*number of data sections*/                 
+  /* for rmid 14    mapped by dsndqist    data manager       */                 
+       3  qws10r4o   bin fixed(31), /*offset to the data section    */          
+       3  qws10r4l   bin fixed(15), /*length of the data section */             
+       3  qws10r4n   bin fixed(15), /*number of data sections*/                 
+  /* for rmid 20    mapped by dsndqtxa          lock manager */                 
+       3  qws10r5o   bin fixed(31), /*offset to the data section    */          
+       3  qws10r5l   bin fixed(15), /*length of the data section */             
+       3  qws10r5n   bin fixed(15), /*number of data sections*/                 
+  /* for rmid 14    mapped by dsndqise     edm pool statistics*/                
+       3  qws10r6o   bin fixed(31), /*offset to the data section    */          
+       3  qws10r6l   bin fixed(15), /*length of the data section */             
+       3  qws10r6n   bin fixed(15), /*number of data sections*/                 
+  /* for rmid 10    mapped by dsndqbgl    group buffer pool statistics*/        
+       3  qws10r7o   bin fixed(31), /*offset to the data section    */          
+       3  qws10r7l   bin fixed(15), /*length of the data section */             
+       3  qws10r7n   bin fixed(15), /*number of data sections*/                 
+  /* for rmid 20    mapped by dsndqtgs    global locking statistics */          
+       3  qws10r8o   bin fixed(31), /*offset to the data section    */          
+       3  qws10r8l   bin fixed(15), /*length of the data section */             
+       3  qws10r8n   bin fixed(15), /*number of data sections*/                 
+  /* for rmid 22    mapped by dsndqles le access from admf statistics */        
+       3  qws10r9o   bin fixed(31), /*offset to the data section    */          
+       3  qws10r9l   bin fixed(15), /*length of the data section */             
+       3  qws10r9n   bin fixed(15), /*number of data sections*/                 
+  /* for rmid 22    mapped by dsndqisj starjoin pool statistics       */        
+       3  qws10rao   bin fixed(31), /*offset to the data section    */          
+       3  qws10ral   bin fixed(15), /*length of the data section */             
+       3  qws10ran   bin fixed(15), /*number of data sections*/                 
+  /* for rmid 033 mapped by dsndq8st   accel svcs system statistics */          
+       3  qws10rbo   bin fixed(31), /*offset to the data section    */          
+       3  qws10rbl   bin fixed(15), /*length of the data section */             
+       3  qws10rbn   bin fixed(15), /*number of data sections*/                 
+  /* for rmid 10  mapped by dsndqbsp simulated buffer pool statistics */        
+       3  qws10rco   bin fixed(31), /*offset to the data section    */          
+       3  qws10rcl   bin fixed(15), /*length of the data section */             
+       3  qws10rcn   bin fixed(15), /*number of data sections*/                 
+       3  qws10end   char(0);     /* end of the self defining section*/         

@@ -1,0 +1,354 @@
+  /********************************************************************/
+  /* Process the QTXA subrecord.                                      */
+  /********************************************************************/
+  processQTXA: procedure;
+    dcl base                               pointer;
+    base = ifi_base + smf_base->qws1.qws10r5o;
+
+    if (debug_mode = '1'b) then do;
+      put skip list('');
+      put skip list(time()
+                 !! ' RIF0001I - I - QTXA.');
+
+      put skip list(time()
+                 !! ' RIF0001I - I - qws1.qws10r5o : '
+                 !! trim(smf_base->qws1.qws10r5o));
+      put skip list(time()
+                 !! ' RIF0001I - I - qws1.qws10r5l : '
+                 !! trim(smf_base->qws1.qws10r5l));
+      put skip list(time()
+                 !! ' RIF0001I - I - qws1.qws10r5n : '
+                 !! trim(smf_base->qws1.qws10r5n));
+    end;
+
+    if (firstItteration = false
+      & gather_QTXA     = '1'b) then do;
+      /* Calculate the delta between the newly fetched IFI record and */
+      /* the saved previous itteration.                               */
+
+      ins_QTXA.qtxadea  = base->QTXA.qtxadea  - saved_QTXA.qtxadea;
+      ins_QTXA.qtxasloc = base->QTXA.qtxasloc - saved_QTXA.qtxasloc;
+      ins_QTXA.qtxatim  = base->QTXA.qtxatim  - saved_QTXA.qtxatim;
+      ins_QTXA.qtxales  = base->QTXA.qtxales  - saved_QTXA.qtxales;
+      ins_QTXA.qtxalex  = base->QTXA.qtxalex  - saved_QTXA.qtxalex;
+      ins_QTXA.qtxanpl  = base->QTXA.qtxanpl  - saved_QTXA.qtxanpl;
+      ins_QTXA.qtxaprec = base->QTXA.qtxaprec - saved_QTXA.qtxaprec;
+      ins_QTXA.qtxaslmt = base->QTXA.qtxaslmt - saved_QTXA.qtxaslmt;
+      ins_QTXA.qtxaclmt = base->QTXA.qtxaclmt - saved_QTXA.qtxaclmt;
+      ins_QTXA.qtxachus = base->QTXA.qtxachus - saved_QTXA.qtxachus;
+      ins_QTXA.qtxaslat = base->QTXA.qtxaslat - saved_QTXA.qtxaslat;
+      ins_QTXA.qtxasoth = base->QTXA.qtxasoth - saved_QTXA.qtxasoth;
+      ins_QTXA.qtxalock = base->QTXA.qtxalock - saved_QTXA.qtxalock;
+      ins_QTXA.qtxaunlk = base->QTXA.qtxaunlk - saved_QTXA.qtxaunlk;
+      ins_QTXA.qtxaqry  = base->QTXA.qtxaqry  - saved_QTXA.qtxaqry;
+      ins_QTXA.qtxachg  = base->QTXA.qtxachg  - saved_QTXA.qtxachg;
+      ins_QTXA.qtxairlm = base->QTXA.qtxairlm - saved_QTXA.qtxairlm;
+      ins_QTXA.qtxaclno = base->QTXA.qtxaclno - saved_QTXA.qtxaclno;
+      ins_QTXA.qtxaclun = base->QTXA.qtxaclun - saved_QTXA.qtxaclun;
+      ins_QTXA.qtxadrno = base->QTXA.qtxadrno - saved_QTXA.qtxadrno;
+      ins_QTXA.qtxadrun = base->QTXA.qtxadrun - saved_QTXA.qtxadrun;
+      ins_QTXA.qtxalcmm = base->QTXA.qtxalcmm - saved_QTXA.qtxalcmm;
+      ins_QTXA.qtxalcmu = base->QTXA.qtxalcmu - saved_QTXA.qtxalcmu;
+      ins_QTXA.qtxalcsm = base->QTXA.qtxalcsm - saved_QTXA.qtxalcsm;
+      ins_QTXA.qtxacrlk = base->QTXA.qtxacrlk - saved_QTXA.qtxacrlk;
+      ins_QTXA.qtxacwlk = base->QTXA.qtxacwlk - saved_QTXA.qtxacwlk;
+      ins_QTXA.qtxacruk = base->QTXA.qtxacruk - saved_QTXA.qtxacruk;
+      ins_QTXA.qtxacwuk = base->QTXA.qtxacwuk - saved_QTXA.qtxacwuk;
+      ins_QTXA.qtxacrch = base->QTXA.qtxacrch - saved_QTXA.qtxacrch;
+      ins_QTXA.qtxacwch = base->QTXA.qtxacwch - saved_QTXA.qtxacwch;
+      ins_QTXA.qtxacrnt = base->QTXA.qtxacrnt - saved_QTXA.qtxacrnt;
+      ins_QTXA.qtxacnnt = base->QTXA.qtxacnnt - saved_QTXA.qtxacnnt;
+      ins_QTXA.qtxacrcp = base->QTXA.qtxacrcp - saved_QTXA.qtxacrcp;
+      ins_QTXA.qtxacwcp = base->QTXA.qtxacwcp - saved_QTXA.qtxacwcp;
+      ins_QTXA.qtxacral = base->QTXA.qtxacral - saved_QTXA.qtxacral;
+      ins_QTXA.qtxacwal = base->QTXA.qtxacwal - saved_QTXA.qtxacwal;
+      ins_QTXA.qtxacwsy = base->QTXA.qtxacwsy - saved_QTXA.qtxacwsy;
+      ins_QTXA.qtxasrcl = base->QTXA.qtxasrcl - saved_QTXA.qtxasrcl;
+      ins_QTXA.qtxaucnt = base->QTXA.qtxaucnt - saved_QTXA.qtxaucnt;
+      ins_QTXA.qtxalccp = base->QTXA.qtxalccp - saved_QTXA.qtxalccp;
+      ins_QTXA.qtxacgen = base->QTXA.qtxacgen - saved_QTXA.qtxacgen;
+      ins_QTXA.qtxacrqf = base->QTXA.qtxacrqf - saved_QTXA.qtxacrqf;
+      ins_QTXA.qtxacwqf = base->QTXA.qtxacwqf - saved_QTXA.qtxacwqf;
+      ins_QTXA.qtxadlcl = base->QTXA.qtxadlcl - saved_QTXA.qtxadlcl;
+      ins_QTXA.qtxatout = base->QTXA.qtxatout - saved_QTXA.qtxatout;
+      ins_QTXA.qtxartry = base->QTXA.qtxartry - saved_QTXA.qtxartry;
+      ins_QTXA.qtxanrty = base->QTXA.qtxanrty - saved_QTXA.qtxanrty;
+      ins_QTXA.qtxasusp = base->QTXA.qtxasusp - saved_QTXA.qtxasusp;
+      ins_QTXA.qtxarsum = base->QTXA.qtxarsum - saved_QTXA.qtxarsum;
+      ins_QTXA.qtxastat = base->QTXA.qtxastat - saved_QTXA.qtxastat;
+      ins_QTXA.qtxadead = base->QTXA.qtxadead - saved_QTXA.qtxadead;
+      ins_QTXA.qtxatime = base->QTXA.qtxatime - saved_QTXA.qtxatime;
+
+      exec sql
+        insert into RIF.ifcid_0002_local_locking_data
+        values(current timestamp
+              ,:current_unix_time
+              ,:admin_info_ssid.subsystem_name
+              ,:ins_QTXA.qtxadea
+              ,:ins_QTXA.qtxasloc
+              ,:ins_QTXA.qtxatim
+              ,:ins_QTXA.qtxales
+              ,:ins_QTXA.qtxalex
+              ,:ins_QTXA.qtxanpl
+              ,:ins_QTXA.qtxaprec
+              ,:ins_QTXA.qtxaslmt
+              ,:ins_QTXA.qtxaclmt
+              ,:ins_QTXA.qtxachus
+              ,:ins_QTXA.qtxaslat
+              ,:ins_QTXA.qtxasoth
+              ,:ins_QTXA.qtxalock
+              ,:ins_QTXA.qtxaunlk
+              ,:ins_QTXA.qtxaqry
+              ,:ins_QTXA.qtxachg
+              ,:ins_QTXA.qtxairlm
+              ,:ins_QTXA.qtxaclno
+              ,:ins_QTXA.qtxaclun
+              ,:ins_QTXA.qtxadrno
+              ,:ins_QTXA.qtxadrun
+              ,:ins_QTXA.qtxalcmm
+              ,:ins_QTXA.qtxalcmu
+              ,:ins_QTXA.qtxalcsm
+              ,:ins_QTXA.qtxacrlk
+              ,:ins_QTXA.qtxacwlk
+              ,:ins_QTXA.qtxacruk
+              ,:ins_QTXA.qtxacwuk
+              ,:ins_QTXA.qtxacrch
+              ,:ins_QTXA.qtxacwch
+              ,:ins_QTXA.qtxacrnt
+              ,:ins_QTXA.qtxacnnt
+              ,:ins_QTXA.qtxacrcp
+              ,:ins_QTXA.qtxacwcp
+              ,:ins_QTXA.qtxacral
+              ,:ins_QTXA.qtxacwal
+              ,:ins_QTXA.qtxacwsy
+              ,:ins_QTXA.qtxasrcl
+              ,:ins_QTXA.qtxaucnt
+              ,:ins_QTXA.qtxalccp
+              ,:ins_QTXA.qtxacgen
+              ,:ins_QTXA.qtxacrqf
+              ,:ins_QTXA.qtxacwqf
+              ,:ins_QTXA.qtxadlcl
+              ,:ins_QTXA.qtxatout
+              ,:ins_QTXA.qtxartry
+              ,:ins_QTXA.qtxanrty
+              ,:ins_QTXA.qtxasusp
+              ,:ins_QTXA.qtxarsum
+              ,:ins_QTXA.qtxastat
+              ,:ins_QTXA.qtxadead
+              ,:ins_QTXA.qtxatime
+              );
+
+      call checksql('Insert QTXA',csql_warn);
+    end;
+
+    /* Save the current version for comparison in the next itteration.*/
+    saved_QTXA = base->QTXA;
+  end processQTXA;
+
+  /********************************************************************/
+  /* QTXA based version                                               */
+  /********************************************************************/
+  dcl 1 qtxa based,
+         2 qtxadea               bin fixed(31),
+         2 qtxasloc              bin fixed(31),
+         2 qtxatim               bin fixed(31),
+         2 qtxales               bin fixed(31),
+         2 qtxalex               bin fixed(31),
+         2 qtxanpl               bin fixed(31),
+         2 qtxaflgs,
+           4 qtxaflg1,
+             6 qtxailmt          bit(1),
+             6 qtxanrun          bit(1),
+             6 *                 bit(6),
+           4 *                   char(1),
+         2 qtxarlid              char(2),
+         2 qtxaprec              bin fixed(31),
+         2 qtxaslmt              bin fixed(31),
+         2 qtxaclmt              bin fixed(31),
+         2 qtxachus              bin fixed(31),
+         2 qtxaslat              bin fixed(31),
+         2 qtxasoth              bin fixed(31),
+
+         2 qtxalock              bin fixed(31),
+         2 qtxaunlk              bin fixed(31),
+         2 qtxaqry               bin fixed(31),
+         2 qtxachg               bin fixed(31),
+         2 qtxairlm              bin fixed(31),
+         2 qtxaclno              bin fixed(31),
+         2 qtxaclun              bin fixed(31),
+         2 qtxadrno              bin fixed(31),
+         2 qtxadrun              bin fixed(31),
+
+         2 qtxaslcc,
+            3 qtxalcmm           bin fixed(31),
+            3 qtxalcmu           bin fixed(31),
+            3 qtxalcsm           bin fixed(31),
+            3 qtxacrlk           bin fixed(31),
+            3 qtxacwlk           bin fixed(31),
+            3 qtxacruk           bin fixed(31),
+            3 qtxacwuk           bin fixed(31),
+            3 qtxacrch           bin fixed(31),
+            3 qtxacwch           bin fixed(31),
+            3 qtxacrnt           bin fixed(31),
+            3 qtxacnnt           bin fixed(31),
+            3 qtxacrcp           bin fixed(31),
+            3 qtxacwcp           bin fixed(31),
+            3 qtxacral           bin fixed(31),
+            3 qtxacwal           bin fixed(31),
+            3 qtxacwsy           bin fixed(31),
+            3 qtxasrcl           bin fixed(31),
+            3 qtxaucnt           bin fixed(31),
+            3 qtxalccp           bin fixed(31),
+            3 qtxacgen           bin fixed(31),
+            3 qtxacrqf           bin fixed(31),
+            3 qtxacwqf           bin fixed(31),
+            3 qtxadlcl           bin fixed(31),
+            3 qtxatout           bin fixed(31),
+            3 qtxartry           bin fixed(31),
+            3 qtxanrty           bin fixed(31),
+            3 qtxasusp           bin fixed(31),
+            3 qtxarsum           bin fixed(31),
+            3 qtxastat           bin fixed(31),
+            3 qtxadead           bin fixed(31),
+            3 qtxatime           bin fixed(31),
+         2 qtxaend    char(0);
+
+
+  /********************************************************************/
+  /* QTXA saved version                                               */
+  /********************************************************************/
+  dcl 1 saved_qtxa,
+         2 qtxadea               bin fixed(31),
+         2 qtxasloc              bin fixed(31),
+         2 qtxatim               bin fixed(31),
+         2 qtxales               bin fixed(31),
+         2 qtxalex               bin fixed(31),
+         2 qtxanpl               bin fixed(31),
+         2 qtxaflgs,
+           4 qtxaflg1,
+             6 qtxailmt          bit(1),
+             6 qtxanrun          bit(1),
+             6 *                 bit(6),
+           4 *                   char(1),
+         2 qtxarlid              char(2),
+         2 qtxaprec              bin fixed(31),
+         2 qtxaslmt              bin fixed(31),
+         2 qtxaclmt              bin fixed(31),
+         2 qtxachus              bin fixed(31),
+         2 qtxaslat              bin fixed(31),
+         2 qtxasoth              bin fixed(31),
+
+         2 qtxalock              bin fixed(31),
+         2 qtxaunlk              bin fixed(31),
+         2 qtxaqry               bin fixed(31),
+         2 qtxachg               bin fixed(31),
+         2 qtxairlm              bin fixed(31),
+         2 qtxaclno              bin fixed(31),
+         2 qtxaclun              bin fixed(31),
+         2 qtxadrno              bin fixed(31),
+         2 qtxadrun              bin fixed(31),
+
+         2 qtxaslcc,
+            3 qtxalcmm           bin fixed(31),
+            3 qtxalcmu           bin fixed(31),
+            3 qtxalcsm           bin fixed(31),
+            3 qtxacrlk           bin fixed(31),
+            3 qtxacwlk           bin fixed(31),
+            3 qtxacruk           bin fixed(31),
+            3 qtxacwuk           bin fixed(31),
+            3 qtxacrch           bin fixed(31),
+            3 qtxacwch           bin fixed(31),
+            3 qtxacrnt           bin fixed(31),
+            3 qtxacnnt           bin fixed(31),
+            3 qtxacrcp           bin fixed(31),
+            3 qtxacwcp           bin fixed(31),
+            3 qtxacral           bin fixed(31),
+            3 qtxacwal           bin fixed(31),
+            3 qtxacwsy           bin fixed(31),
+            3 qtxasrcl           bin fixed(31),
+            3 qtxaucnt           bin fixed(31),
+            3 qtxalccp           bin fixed(31),
+            3 qtxacgen           bin fixed(31),
+            3 qtxacrqf           bin fixed(31),
+            3 qtxacwqf           bin fixed(31),
+            3 qtxadlcl           bin fixed(31),
+            3 qtxatout           bin fixed(31),
+            3 qtxartry           bin fixed(31),
+            3 qtxanrty           bin fixed(31),
+            3 qtxasusp           bin fixed(31),
+            3 qtxarsum           bin fixed(31),
+            3 qtxastat           bin fixed(31),
+            3 qtxadead           bin fixed(31),
+            3 qtxatime           bin fixed(31),
+         2 qtxaend    char(0);
+
+
+  /********************************************************************/
+  /* QTXA version for inserting                                       */
+  /********************************************************************/
+  dcl 1 ins_qtxa,
+         2 qtxadea               bin fixed(31),
+         2 qtxasloc              bin fixed(31),
+         2 qtxatim               bin fixed(31),
+         2 qtxales               bin fixed(31),
+         2 qtxalex               bin fixed(31),
+         2 qtxanpl               bin fixed(31),
+         2 qtxaflgs,
+           4 qtxaflg1,
+             6 qtxailmt          bit(1),
+             6 qtxanrun          bit(1),
+             6 *                 bit(6),
+           4 *                   char(1),
+         2 qtxarlid              char(2),
+         2 qtxaprec              bin fixed(31),
+         2 qtxaslmt              bin fixed(31),
+         2 qtxaclmt              bin fixed(31),
+         2 qtxachus              bin fixed(31),
+         2 qtxaslat              bin fixed(31),
+         2 qtxasoth              bin fixed(31),
+
+         2 qtxalock              bin fixed(31),
+         2 qtxaunlk              bin fixed(31),
+         2 qtxaqry               bin fixed(31),
+         2 qtxachg               bin fixed(31),
+         2 qtxairlm              bin fixed(31),
+         2 qtxaclno              bin fixed(31),
+         2 qtxaclun              bin fixed(31),
+         2 qtxadrno              bin fixed(31),
+         2 qtxadrun              bin fixed(31),
+
+         2 qtxaslcc,
+            3 qtxalcmm           bin fixed(31),
+            3 qtxalcmu           bin fixed(31),
+            3 qtxalcsm           bin fixed(31),
+            3 qtxacrlk           bin fixed(31),
+            3 qtxacwlk           bin fixed(31),
+            3 qtxacruk           bin fixed(31),
+            3 qtxacwuk           bin fixed(31),
+            3 qtxacrch           bin fixed(31),
+            3 qtxacwch           bin fixed(31),
+            3 qtxacrnt           bin fixed(31),
+            3 qtxacnnt           bin fixed(31),
+            3 qtxacrcp           bin fixed(31),
+            3 qtxacwcp           bin fixed(31),
+            3 qtxacral           bin fixed(31),
+            3 qtxacwal           bin fixed(31),
+            3 qtxacwsy           bin fixed(31),
+            3 qtxasrcl           bin fixed(31),
+            3 qtxaucnt           bin fixed(31),
+            3 qtxalccp           bin fixed(31),
+            3 qtxacgen           bin fixed(31),
+            3 qtxacrqf           bin fixed(31),
+            3 qtxacwqf           bin fixed(31),
+            3 qtxadlcl           bin fixed(31),
+            3 qtxatout           bin fixed(31),
+            3 qtxartry           bin fixed(31),
+            3 qtxanrty           bin fixed(31),
+            3 qtxasusp           bin fixed(31),
+            3 qtxarsum           bin fixed(31),
+            3 qtxastat           bin fixed(31),
+            3 qtxadead           bin fixed(31),
+            3 qtxatime           bin fixed(31),
+         2 qtxaend    char(0);
+
+

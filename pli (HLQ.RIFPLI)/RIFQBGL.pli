@@ -1,0 +1,393 @@
+  /********************************************************************/
+  /* Process the QBGL subrecord.                                      */
+  /********************************************************************/
+  processQBGL: procedure;
+    dcl base                               pointer;
+    base = ifi_base + smf_base->qws1.qws10r7o;
+
+    if (debug_mode = '1'b) then do;
+      put skip list('');
+      put skip list(time()
+                 !! ' RIF0001I - I - QBGL.');
+
+      put skip list(time()
+                 !! ' RIF0001I - I - qws1.qws10r7o : '
+                 !! trim(smf_base->qws1.qws10r7o));
+      put skip list(time()
+                 !! ' RIF0001I - I - qws1.qws10r7l : '
+                 !! trim(smf_base->qws1.qws10r7l));
+      put skip list(time()
+                 !! ' RIF0001I - I - qws1.qws10r7n : '
+                 !! trim(smf_base->qws1.qws10r7n));
+    end;
+
+    dcl i                                  bin fixed(31);
+    dcl current_bpid                       bin fixed(31);
+
+    do i = 1 to smf_base->qws1.qws10r7n;
+
+      /* We use the BPID as the offset in our save array. We add one  */
+      /* to the current bpid because bpids start at 0, but PL/I arrays*/
+      /* start at 1...                                                */
+      current_bpid = base->qbgl.qbglgn + 1;
+
+      if (firstItteration = false
+        & gather_QBGL     = '1'b) then do;
+        /* Calculate the delta between the newly fetched IFI record an*/
+        /* the saved previous itteration.                             */
+
+        ins_QBGL.qbglgn  = base->qbgl.qbglgn;
+
+        ins_qbgl.qbglgg  = base->qbgl.qbglgg
+                         - saved_qbgl(current_bpid).qbglgg;
+        ins_qbgl.qbglxd  = base->qbgl.qbglxd
+                         - saved_qbgl(current_bpid).qbglxd;
+        ins_qbgl.qbglxr  = base->qbgl.qbglxr
+                         - saved_qbgl(current_bpid).qbglxr;
+        ins_qbgl.qbglmd  = base->qbgl.qbglmd
+                         - saved_qbgl(current_bpid).qbglmd;
+        ins_qbgl.qbglmr  = base->qbgl.qbglmr
+                         - saved_qbgl(current_bpid).qbglmr;
+        ins_qbgl.qbglsw  = base->qbgl.qbglsw
+                         - saved_qbgl(current_bpid).qbglsw;
+        ins_qbgl.qbglwc  = base->qbgl.qbglwc
+                         - saved_qbgl(current_bpid).qbglwc;
+        ins_qbgl.qbglct  = base->qbgl.qbglct
+                         - saved_qbgl(current_bpid).qbglct;
+        ins_qbgl.qbglgt  = base->qbgl.qbglgt
+                         - saved_qbgl(current_bpid).qbglgt;
+        ins_qbgl.qbglwm  = base->qbgl.qbglwm
+                         - saved_qbgl(current_bpid).qbglwm;
+        ins_qbgl.qbglws  = base->qbgl.qbglws
+                         - saved_qbgl(current_bpid).qbglws;
+        ins_qbgl.qbglex  = base->qbgl.qbglex
+                         - saved_qbgl(current_bpid).qbglex;
+        ins_qbgl.qbglaw  = base->qbgl.qbglaw
+                         - saved_qbgl(current_bpid).qbglaw;
+        ins_qbgl.qbglrc  = base->qbgl.qbglrc
+                         - saved_qbgl(current_bpid).qbglrc;
+        ins_qbgl.qbglcm  = base->qbgl.qbglcm
+                         - saved_qbgl(current_bpid).qbglcm;
+        ins_qbgl.qbglcr  = base->qbgl.qbglcr
+                         - saved_qbgl(current_bpid).qbglcr;
+        ins_qbgl.qbglwp  = base->qbgl.qbglwp
+                         - saved_qbgl(current_bpid).qbglwp;
+        ins_qbgl.qbglwf  = base->qbgl.qbglwf
+                         - saved_qbgl(current_bpid).qbglwf;
+        ins_qbgl.qbglos  = base->qbgl.qbglos
+                         - saved_qbgl(current_bpid).qbglos;
+        ins_qbgl.qbglac  = base->qbgl.qbglac
+                         - saved_qbgl(current_bpid).qbglac;
+        ins_qbgl.qbglax  = base->qbgl.qbglax
+                         - saved_qbgl(current_bpid).qbglax;
+        ins_qbgl.qbglay  = base->qbgl.qbglay
+                         - saved_qbgl(current_bpid).qbglay;
+        ins_qbgl.qbglck  = base->qbgl.qbglck
+                         - saved_qbgl(current_bpid).qbglck;
+        ins_qbgl.qbglun  = base->qbgl.qbglun
+                         - saved_qbgl(current_bpid).qbglun;
+        ins_qbgl.qbglcc  = base->qbgl.qbglcc
+                         - saved_qbgl(current_bpid).qbglcc;
+        ins_qbgl.qbglcs  = base->qbgl.qbglcs
+                         - saved_qbgl(current_bpid).qbglcs;
+        ins_qbgl.qbgldn  = base->qbgl.qbgldn
+                         - saved_qbgl(current_bpid).qbgldn;
+        ins_qbgl.qbglrd  = base->qbgl.qbglrd
+                         - saved_qbgl(current_bpid).qbglrd;
+        ins_qbgl.qbglrg  = base->qbgl.qbglrg
+                         - saved_qbgl(current_bpid).qbglrg;
+        ins_qbgl.qbgldg  = base->qbgl.qbgldg
+                         - saved_qbgl(current_bpid).qbgldg;
+        ins_qbgl.qbgl2f  = base->qbgl.qbgl2f
+                         - saved_qbgl(current_bpid).qbgl2f;
+        ins_qbgl.qbgl2s  = base->qbgl.qbgl2s
+                         - saved_qbgl(current_bpid).qbgl2s;
+        ins_qbgl.qbgl2d  = base->qbgl.qbgl2d
+                         - saved_qbgl(current_bpid).qbgl2d;
+        ins_qbgl.qbgl2r  = base->qbgl.qbgl2r
+                         - saved_qbgl(current_bpid).qbgl2r;
+        ins_qbgl.qbgl2n  = base->qbgl.qbgl2n
+                         - saved_qbgl(current_bpid).qbgl2n;
+        ins_qbgl.qbglhs  = base->qbgl.qbglhs
+                         - saved_qbgl(current_bpid).qbglhs;
+        ins_qbgl.qbgl2h  = base->qbgl.qbgl2h
+                         - saved_qbgl(current_bpid).qbgl2h;
+        ins_qbgl.qbglp1  = base->qbgl.qbglp1
+                         - saved_qbgl(current_bpid).qbglp1;
+        ins_qbgl.qbglp2  = base->qbgl.qbglp2
+                         - saved_qbgl(current_bpid).qbglp2;
+        ins_qbgl.qbglp3  = base->qbgl.qbglp3
+                         - saved_qbgl(current_bpid).qbglp3;
+        ins_qbgl.qbglu1  = base->qbgl.qbglu1
+                         - saved_qbgl(current_bpid).qbglu1;
+        ins_qbgl.qbgls1  = base->qbgl.qbgls1
+                         - saved_qbgl(current_bpid).qbgls1;
+        ins_qbgl.qbgls2  = base->qbgl.qbgls2
+                         - saved_qbgl(current_bpid).qbgls2;
+        ins_qbgl.qbgls3  = base->qbgl.qbgls3
+                         - saved_qbgl(current_bpid).qbgls3;
+        ins_qbgl.qbgln1  = base->qbgl.qbgln1
+                         - saved_qbgl(current_bpid).qbgln1;
+        ins_qbgl.qbgln2  = base->qbgl.qbgln2
+                         - saved_qbgl(current_bpid).qbgln2;
+        ins_qbgl.qbgln3  = base->qbgl.qbgln3
+                         - saved_qbgl(current_bpid).qbgln3;
+        ins_qbgl.qbglwa  = base->qbgl.qbglwa
+                         - saved_qbgl(current_bpid).qbglwa;
+        ins_qbgl.qbglwx  = base->qbgl.qbglwx
+                         - saved_qbgl(current_bpid).qbglwx;
+        ins_qbgl.qbglsu  = base->qbgl.qbglsu
+                         - saved_qbgl(current_bpid).qbglsu;
+        ins_qbgl.qbglas  = base->qbgl.qbglas
+                         - saved_qbgl(current_bpid).qbglas;
+
+        exec sql
+          insert into RIF.ifcid_0002_group_buffer_pool
+          values(current timestamp
+                ,:current_unix_time
+                ,:admin_info_ssid.subsystem_name
+                ,:ins_qbgl.qbglgn
+                ,:ins_qbgl.qbglgg
+                ,:ins_qbgl.qbglxd
+                ,:ins_qbgl.qbglxr
+                ,:ins_qbgl.qbglmd
+                ,:ins_qbgl.qbglmr
+                ,:ins_qbgl.qbglsw
+                ,:ins_qbgl.qbglwc
+                ,:ins_qbgl.qbglct
+                ,:ins_qbgl.qbglgt
+                ,:ins_qbgl.qbglwm
+                ,:ins_qbgl.qbglws
+                ,:ins_qbgl.qbglex
+                ,:ins_qbgl.qbglaw
+                ,:ins_qbgl.qbglrc
+                ,:ins_qbgl.qbglcm
+                ,:ins_qbgl.qbglcr
+                ,:ins_qbgl.qbglwp
+                ,:ins_qbgl.qbglwf
+                ,:ins_qbgl.qbglos
+                ,:ins_qbgl.qbglac
+                ,:ins_qbgl.qbglax
+                ,:ins_qbgl.qbglay
+                ,:ins_qbgl.qbglck
+                ,:ins_qbgl.qbglun
+                ,:ins_qbgl.qbglcc
+                ,:ins_qbgl.qbglcs
+                ,:ins_qbgl.qbgldn
+                ,:ins_qbgl.qbglrd
+                ,:ins_qbgl.qbglrg
+                ,:ins_qbgl.qbgldg
+                ,:ins_qbgl.qbgl2f
+                ,:ins_qbgl.qbgl2s
+                ,:ins_qbgl.qbgl2d
+                ,:ins_qbgl.qbgl2r
+                ,:ins_qbgl.qbgl2n
+                ,:ins_qbgl.qbglhs
+                ,:ins_qbgl.qbgl2h
+                ,:ins_qbgl.qbglp1
+                ,:ins_qbgl.qbglp2
+                ,:ins_qbgl.qbglp3
+                ,:ins_qbgl.qbglu1
+                ,:ins_qbgl.qbgls1
+                ,:ins_qbgl.qbgls2
+                ,:ins_qbgl.qbgls3
+                ,:ins_qbgl.qbgln1
+                ,:ins_qbgl.qbgln2
+                ,:ins_qbgl.qbgln3
+                ,:ins_qbgl.qbglwa
+                ,:ins_qbgl.qbglwx
+                ,:ins_qbgl.qbglsu
+                ,:ins_qbgl.qbglas
+                );
+
+        call checksql('Insert QBGL',csql_warn);
+      end;
+
+      saved_QBGL(current_bpid) = base->QBGL;
+      base += smf_base->qws1.qws10r7l;
+    end;
+  end processQBGL;
+
+  /********************************************************************/
+  /* QBGL based version                                               */
+  /********************************************************************/
+  dcl 1 qbgl based,
+        3 qbglgn     unsigned bin fixed(32),
+        3 qbglflg    bit(8),
+        3 *          char(3),
+        3 qbglgg     unsigned bin fixed(64),
+        3 qbglxd     unsigned bin fixed(64),
+        3 qbglxr     unsigned bin fixed(64),
+        3 qbglmd     unsigned bin fixed(64),
+        3 qbglmr     unsigned bin fixed(64),
+        3 qbglsw     unsigned bin fixed(64),
+        3 qbglwc     unsigned bin fixed(64),
+        3 qbglct     unsigned bin fixed(64),
+        3 qbglgt     unsigned bin fixed(64),
+        3 qbglwm     unsigned bin fixed(64),
+        3 qbglws     unsigned bin fixed(64),
+        3 qbglex     unsigned bin fixed(64),
+        3 qbglaw     unsigned bin fixed(64),
+        3 qbglrc     unsigned bin fixed(64),
+        3 qbglcm     unsigned bin fixed(64),
+        3 qbglcr     unsigned bin fixed(64),
+        3 qbglwp     unsigned bin fixed(64),
+        3 qbglwf     unsigned bin fixed(64),
+        3 qbglos     unsigned bin fixed(64),
+        3 qbglac     unsigned bin fixed(64),
+        3 qbglax     unsigned bin fixed(64),
+        3 qbglay     unsigned bin fixed(64),
+        3 qbglck     unsigned bin fixed(64),
+        3 qbglun     unsigned bin fixed(64),
+        3 qbglcc     unsigned bin fixed(64),
+        3 qbglcs     unsigned bin fixed(64),
+        3 qbgldn     unsigned bin fixed(64),
+        3 qbglrd     unsigned bin fixed(64),
+        3 qbglrg     unsigned bin fixed(64),
+        3 qbgldg     unsigned bin fixed(64),
+        3 qbgl2f     unsigned bin fixed(64),
+        3 qbgl2s     unsigned bin fixed(64),
+        3 qbgl2d     unsigned bin fixed(64),
+        3 qbgl2r     unsigned bin fixed(64),
+        3 qbgl2n     unsigned bin fixed(64),
+        3 qbglhs     unsigned bin fixed(64),
+        3 qbgl2h     unsigned bin fixed(64),
+        3 qbglp1     unsigned bin fixed(64),
+        3 qbglp2     unsigned bin fixed(64),
+        3 qbglp3     unsigned bin fixed(64),
+        3 qbglu1     unsigned bin fixed(64),
+        3 qbgls1     unsigned bin fixed(64),
+        3 qbgls2     unsigned bin fixed(64),
+        3 qbgls3     unsigned bin fixed(64),
+        3 qbgln1     unsigned bin fixed(64),
+        3 qbgln2     unsigned bin fixed(64),
+        3 qbgln3     unsigned bin fixed(64),
+        3 qbglwa     unsigned bin fixed(64),
+        3 qbglwx     unsigned bin fixed(64),
+        3 qbglsu     unsigned bin fixed(64),
+        3 qbglas     unsigned bin fixed(64),
+        3 qbglend    char(0);
+
+
+  /********************************************************************/
+  /* QBGL saved version                                               */
+  /********************************************************************/
+  dcl 1 saved_qbgl(130),
+        3 qbglgn     unsigned bin fixed(32),
+        3 qbglflg    bit(8),
+        3 *          char(3),
+        3 qbglgg     unsigned bin fixed(64),
+        3 qbglxd     unsigned bin fixed(64),
+        3 qbglxr     unsigned bin fixed(64),
+        3 qbglmd     unsigned bin fixed(64),
+        3 qbglmr     unsigned bin fixed(64),
+        3 qbglsw     unsigned bin fixed(64),
+        3 qbglwc     unsigned bin fixed(64),
+        3 qbglct     unsigned bin fixed(64),
+        3 qbglgt     unsigned bin fixed(64),
+        3 qbglwm     unsigned bin fixed(64),
+        3 qbglws     unsigned bin fixed(64),
+        3 qbglex     unsigned bin fixed(64),
+        3 qbglaw     unsigned bin fixed(64),
+        3 qbglrc     unsigned bin fixed(64),
+        3 qbglcm     unsigned bin fixed(64),
+        3 qbglcr     unsigned bin fixed(64),
+        3 qbglwp     unsigned bin fixed(64),
+        3 qbglwf     unsigned bin fixed(64),
+        3 qbglos     unsigned bin fixed(64),
+        3 qbglac     unsigned bin fixed(64),
+        3 qbglax     unsigned bin fixed(64),
+        3 qbglay     unsigned bin fixed(64),
+        3 qbglck     unsigned bin fixed(64),
+        3 qbglun     unsigned bin fixed(64),
+        3 qbglcc     unsigned bin fixed(64),
+        3 qbglcs     unsigned bin fixed(64),
+        3 qbgldn     unsigned bin fixed(64),
+        3 qbglrd     unsigned bin fixed(64),
+        3 qbglrg     unsigned bin fixed(64),
+        3 qbgldg     unsigned bin fixed(64),
+        3 qbgl2f     unsigned bin fixed(64),
+        3 qbgl2s     unsigned bin fixed(64),
+        3 qbgl2d     unsigned bin fixed(64),
+        3 qbgl2r     unsigned bin fixed(64),
+        3 qbgl2n     unsigned bin fixed(64),
+        3 qbglhs     unsigned bin fixed(64),
+        3 qbgl2h     unsigned bin fixed(64),
+        3 qbglp1     unsigned bin fixed(64),
+        3 qbglp2     unsigned bin fixed(64),
+        3 qbglp3     unsigned bin fixed(64),
+        3 qbglu1     unsigned bin fixed(64),
+        3 qbgls1     unsigned bin fixed(64),
+        3 qbgls2     unsigned bin fixed(64),
+        3 qbgls3     unsigned bin fixed(64),
+        3 qbgln1     unsigned bin fixed(64),
+        3 qbgln2     unsigned bin fixed(64),
+        3 qbgln3     unsigned bin fixed(64),
+        3 qbglwa     unsigned bin fixed(64),
+        3 qbglwx     unsigned bin fixed(64),
+        3 qbglsu     unsigned bin fixed(64),
+        3 qbglas     unsigned bin fixed(64),
+        3 qbglend    char(0);
+
+
+  /********************************************************************/
+  /* QBGL version for inserting                                       */
+  /********************************************************************/
+  dcl 1 ins_qbgl,
+        3 qbglgn     bin fixed(31),
+        3 qbglflg    bit(8),
+        3 *          char(3),
+        3 qbglgg     bin fixed(63),
+        3 qbglxd     bin fixed(63),
+        3 qbglxr     bin fixed(63),
+        3 qbglmd     bin fixed(63),
+        3 qbglmr     bin fixed(63),
+        3 qbglsw     bin fixed(63),
+        3 qbglwc     bin fixed(63),
+        3 qbglct     bin fixed(63),
+        3 qbglgt     bin fixed(63),
+        3 qbglwm     bin fixed(63),
+        3 qbglws     bin fixed(63),
+        3 qbglex     bin fixed(63),
+        3 qbglaw     bin fixed(63),
+        3 qbglrc     bin fixed(63),
+        3 qbglcm     bin fixed(63),
+        3 qbglcr     bin fixed(63),
+        3 qbglwp     bin fixed(63),
+        3 qbglwf     bin fixed(63),
+        3 qbglos     bin fixed(63),
+        3 qbglac     bin fixed(63),
+        3 qbglax     bin fixed(63),
+        3 qbglay     bin fixed(63),
+        3 qbglck     bin fixed(63),
+        3 qbglun     bin fixed(63),
+        3 qbglcc     bin fixed(63),
+        3 qbglcs     bin fixed(63),
+        3 qbgldn     bin fixed(63),
+        3 qbglrd     bin fixed(63),
+        3 qbglrg     bin fixed(63),
+        3 qbgldg     bin fixed(63),
+        3 qbgl2f     bin fixed(63),
+        3 qbgl2s     bin fixed(63),
+        3 qbgl2d     bin fixed(63),
+        3 qbgl2r     bin fixed(63),
+        3 qbgl2n     bin fixed(63),
+        3 qbglhs     bin fixed(63),
+        3 qbgl2h     bin fixed(63),
+        3 qbglp1     bin fixed(63),
+        3 qbglp2     bin fixed(63),
+        3 qbglp3     bin fixed(63),
+        3 qbglu1     bin fixed(63),
+        3 qbgls1     bin fixed(63),
+        3 qbgls2     bin fixed(63),
+        3 qbgls3     bin fixed(63),
+        3 qbgln1     bin fixed(63),
+        3 qbgln2     bin fixed(63),
+        3 qbgln3     bin fixed(63),
+        3 qbglwa     bin fixed(63),
+        3 qbglwx     bin fixed(63),
+        3 qbglsu     bin fixed(63),
+        3 qbglas     bin fixed(63),
+        3 qbglend    char(0);
+
+

@@ -1,0 +1,668 @@
+  /********************************************************************/
+  /* Process the Q8ST subrecord.                                      */
+  /********************************************************************/
+  processQ8ST: procedure;
+    dcl i                                  bin fixed(31);
+
+    dcl base                               pointer;
+    dcl idaa_base                          pointer;
+
+    dcl idaa_name_addr                     pointer;
+    dcl idaa_name                          char(128) varying based;
+
+    dcl next_block_offset                  unsigned bin fixed(16) based;
+
+    base = ifi_base + smf_base->qws1.qws10rbo;
+
+
+    if (debug_mode = '1'b) then do;
+      put skip list('');
+      put skip list(time()
+                 !! ' RIF0001I - I - Q8ST.');
+
+      put skip list(time()
+                 !! ' RIF0001I - I - qws1.qws10rbo : '
+                 !! trim(smf_base->qws1.qws10rbo));
+      put skip list(time()
+                 !! ' RIF0001I - I - qws1.qws10rbl : '
+                 !! trim(smf_base->qws1.qws10rbl));
+      put skip list(time()
+                 !! ' RIF0001I - I - qws1.qws10rbn : '
+                 !! trim(smf_base->qws1.qws10rbn));
+    end;
+
+
+    /* Loop for all Q8ST blocks in the record.                        */
+    do i = 1 to smf_base->qws1.qws10rbn;
+      idaa_base      = base + 2;       /* skip over q8st length.      */
+      idaa_name_addr = idaa_base + idaa_base->q8st.q8stname_off;
+
+
+      if (debug_mode = '1'b) then do;
+        put skip list(time()
+                   !! ' RIF0001I - I - q8st.q8stname_off : '
+                   !! trim(idaa_base->q8st.q8stname_off));
+        put skip list(time()
+                   !! ' RIF0001I - I - q8st.length       : '
+                   !! trim(base->next_block_offset));
+        put skip list(time()
+                   !! ' RIF0001I - I - q8st.q8stname_var : '
+                   !! idaa_name_addr->idaa_name);
+      end;
+
+
+      if (firstItteration = false
+        & gather_q8st     = '1'b) then do;
+        /* Calculate the delta between the newly fetched IFI record an*/
+        /* the saved previous itteration.                             */
+
+        ins_q8st.q8stname = idaa_name_addr->idaa_name;
+
+        /*
+        ins_q8st.q8stawat = saved_q8st(i).q8stawat - idaa_base->q8st.q8stawat;
+        ins_q8st.q8sttcms = saved_q8st(i).q8sttcms - idaa_base->q8st.q8sttcms;
+        ins_q8st.q8sttcma = saved_q8st(i).q8sttcma - idaa_base->q8st.q8sttcma;
+        ins_q8st.q8sttccs = saved_q8st(i).q8sttccs - idaa_base->q8st.q8sttccs;
+        ins_q8st.q8sttcca = saved_q8st(i).q8sttcca - idaa_base->q8st.q8sttcca;
+        */
+
+        ins_q8st.q8stconn = idaa_base->q8st.q8stconn
+                          - saved_q8st(i).q8stconn;
+        ins_q8st.q8streq  = idaa_base->q8st.q8streq
+                          - saved_q8st(i).q8streq;
+        ins_q8st.q8sttout = idaa_base->q8st.q8sttout
+                          - saved_q8st(i).q8sttout;
+        ins_q8st.q8stfail = idaa_base->q8st.q8stfail
+                          - saved_q8st(i).q8stfail;
+        ins_q8st.q8stbyts = idaa_base->q8st.q8stbyts
+                          - saved_q8st(i).q8stbyts;
+        ins_q8st.q8stbytr = idaa_base->q8st.q8stbytr
+                          - saved_q8st(i).q8stbytr;
+        ins_q8st.q8stmsgs = idaa_base->q8st.q8stmsgs
+                          - saved_q8st(i).q8stmsgs;
+        ins_q8st.q8stmsgr = idaa_base->q8st.q8stmsgr
+                          - saved_q8st(i).q8stmsgr;
+        ins_q8st.q8stblks = idaa_base->q8st.q8stblks
+                          - saved_q8st(i).q8stblks;
+        ins_q8st.q8stblkr = idaa_base->q8st.q8stblkr
+                          - saved_q8st(i).q8stblkr;
+        ins_q8st.q8strows = idaa_base->q8st.q8strows
+                          - saved_q8st(i).q8strows;
+        ins_q8st.q8strowr = idaa_base->q8st.q8strowr
+                          - saved_q8st(i).q8strowr;
+        ins_q8st.q8stnlrs = idaa_base->q8st.q8stnlrs
+                          - saved_q8st(i).q8stnlrs;
+        ins_q8st.q8stnlra = idaa_base->q8st.q8stnlra
+                          - saved_q8st(i).q8stnlra;
+        ins_q8st.q8stnlts = idaa_base->q8st.q8stnlts
+                          - saved_q8st(i).q8stnlts;
+        ins_q8st.q8stnlta = idaa_base->q8st.q8stnlta
+                          - saved_q8st(i).q8stnlta;
+        ins_q8st.q8stnbs  = idaa_base->q8st.q8stnbs
+                          - saved_q8st(i).q8stnbs;
+        ins_q8st.q8stnba  = idaa_base->q8st.q8stnba
+                          - saved_q8st(i).q8stnba;
+        ins_q8st.q8stnis  = idaa_base->q8st.q8stnis
+                          - saved_q8st(i).q8stnis;
+        ins_q8st.q8stnia  = idaa_base->q8st.q8stnia
+                          - saved_q8st(i).q8stnia;
+        ins_q8st.q8stnus  = idaa_base->q8st.q8stnus
+                          - saved_q8st(i).q8stnus;
+        ins_q8st.q8stnua  = idaa_base->q8st.q8stnua
+                          - saved_q8st(i).q8stnua;
+        ins_q8st.q8stnds  = idaa_base->q8st.q8stnds
+                          - saved_q8st(i).q8stnds;
+        ins_q8st.q8stnda  = idaa_base->q8st.q8stnda
+                          - saved_q8st(i).q8stnda;
+        ins_q8st.q8stinsc = idaa_base->q8st.q8stinsc
+                          - saved_q8st(i).q8stinsc;
+        ins_q8st.q8stupdc = idaa_base->q8st.q8stupdc
+                          - saved_q8st(i).q8stupdc;
+        ins_q8st.q8stdelc = idaa_base->q8st.q8stdelc
+                          - saved_q8st(i).q8stdelc;
+        ins_q8st.q8stdrpc = idaa_base->q8st.q8stdrpc
+                          - saved_q8st(i).q8stdrpc;
+        ins_q8st.q8stcrtc = idaa_base->q8st.q8stcrtc
+                          - saved_q8st(i).q8stcrtc;
+        ins_q8st.q8stcmtc = idaa_base->q8st.q8stcmtc
+                          - saved_q8st(i).q8stcmtc;
+        ins_q8st.q8strbkc = idaa_base->q8st.q8strbkc
+                          - saved_q8st(i).q8strbkc;
+        ins_q8st.q8stopnc = idaa_base->q8st.q8stopnc
+                          - saved_q8st(i).q8stopnc;
+        ins_q8st.q8stoflw = idaa_base->q8st.q8stoflw
+                          - saved_q8st(i).q8stoflw;
+        ins_q8st.q8sttdps = idaa_base->q8st.q8sttdps
+                          - saved_q8st(i).q8sttdps;
+        ins_q8st.q8stedps = idaa_base->q8st.q8stedps
+                          - saved_q8st(i).q8stedps;
+        ins_q8st.q8sttdpa = idaa_base->q8st.q8sttdpa
+                          - saved_q8st(i).q8sttdpa;
+        ins_q8st.q8stedpa = idaa_base->q8st.q8stedpa
+                          - saved_q8st(i).q8stedpa;
+
+        ins_q8st.q8stsreq = idaa_base->q8st.q8stsreq
+                          - saved_q8st(i).q8stsreq;
+        ins_q8st.q8stfreq = idaa_base->q8st.q8stfreq
+                          - saved_q8st(i).q8stfreq;
+        ins_q8st.q8stnqsa = idaa_base->q8st.q8stnqsa
+                          - saved_q8st(i).q8stnqsa;
+        ins_q8st.q8stnqfa = idaa_base->q8st.q8stnqfa
+                          - saved_q8st(i).q8stnqfa;
+        ins_q8st.q8stmnqs    = idaa_base->q8st.q8stmnqs;
+
+        /* CPU fields have to be divided by 4096000000                */
+        ins_q8st.q8sttcqs = idaa_base->q8st.q8sttcqs
+                          - saved_q8st(i).q8sttcqs;
+        ins_q8st.q8sttcqa = idaa_base->q8st.q8sttcqa
+                          - saved_q8st(i).q8sttcqa;
+        ins_q8st.q8sttcms = idaa_base->q8st.q8sttcms
+                          - saved_q8st(i).q8sttcms;
+        ins_q8st.q8sttcma = idaa_base->q8st.q8sttcma
+                          - saved_q8st(i).q8sttcma;
+        ins_q8st.q8sttccs = idaa_base->q8st.q8sttccs
+                          - saved_q8st(i).q8sttccs;
+        ins_q8st.q8sttcca = idaa_base->q8st.q8sttcca
+                          - saved_q8st(i).q8sttcca;
+
+        ins_q8st.q8stscpu = idaa_base->q8st.q8stscpu
+                          - saved_q8st(i).q8stscpu;
+        ins_q8st.q8stsela = idaa_base->q8st.q8stsela
+                          - saved_q8st(i).q8stsela;
+        ins_q8st.q8sttcpu = idaa_base->q8st.q8sttcpu
+                          - saved_q8st(i).q8sttcpu;
+        ins_q8st.q8sttela = idaa_base->q8st.q8sttela
+                          - saved_q8st(i).q8sttela;
+        ins_q8st.q8stacpu = idaa_base->q8st.q8stacpu
+                          - saved_q8st(i).q8stacpu;
+        ins_q8st.q8staela = idaa_base->q8st.q8staela
+                          - saved_q8st(i).q8staela;
+        ins_q8st.q8stawat = idaa_base->q8st.q8stawat
+                          - saved_q8st(i).q8stawat;
+
+        ins_q8st.q8sttcqs = ins_q8st.q8sttcqs / 4096000000;
+        ins_q8st.q8sttcqa = ins_q8st.q8sttcqa / 4096000000;
+        ins_q8st.q8sttcms = ins_q8st.q8sttcms / 4096000000;
+        ins_q8st.q8sttcma = ins_q8st.q8sttcma / 4096000000;
+        ins_q8st.q8sttccs = ins_q8st.q8sttccs / 4096000000;
+        ins_q8st.q8sttcca = ins_q8st.q8sttcca / 4096000000;
+        ins_q8st.q8stscpu = ins_q8st.q8stscpu / 4096000000;
+        ins_q8st.q8stsela = ins_q8st.q8stsela / 4096000000;
+        ins_q8st.q8sttcpu = ins_q8st.q8sttcpu / 4096000000;
+        ins_q8st.q8sttela = ins_q8st.q8sttela / 4096000000;
+        ins_q8st.q8stacpu = ins_q8st.q8stacpu / 4096000000;
+        ins_q8st.q8staela = ins_q8st.q8staela / 4096000000;
+        ins_q8st.q8stawat = ins_q8st.q8stawat / 4096000000;
+
+        /* Fields that are absolutes and don't need comparing.        */
+        ins_q8st.q8stnqcs = idaa_base->q8st.q8stnqcs;
+        ins_q8st.q8stactv_64 = idaa_base->q8st.q8stactv_64;
+        ins_q8st.q8stmaxa_64 = idaa_base->q8st.q8stmaxa_64;
+        ins_q8st.q8sttate    = idaa_base->q8st.q8sttate;
+        ins_q8st.q8stquew    = idaa_base->q8st.q8stquew;
+        ins_q8st.q8stquem    = idaa_base->q8st.q8stquem;
+        ins_q8st.q8stcors    = idaa_base->q8st.q8stcors;
+        ins_q8st.q8stdska    = idaa_base->q8st.q8stdska;
+        ins_q8st.q8stdsku    = idaa_base->q8st.q8stdsku / 100;
+        ins_q8st.q8stdskb    = idaa_base->q8st.q8stdskb;
+        ins_q8st.q8stnmds    = idaa_base->q8st.q8stnmds;
+        ins_q8st.q8stdsa     = idaa_base->q8st.q8stdsa;
+        ins_q8st.q8stcql     = idaa_base->q8st.q8stcql;
+        ins_q8st.q8stwnod_64 = idaa_base->q8st.q8stwnod_64;
+        ins_q8st.q8stccpu_64 = idaa_base->q8st.q8stccpu_64 / 100;
+        ins_q8st.q8stwcpu_64 = idaa_base->q8st.q8stwcpu_64 / 100;
+        ins_q8st.q8stcrl     = idaa_base->q8st.q8stcrl / 1000000;
+        ins_q8st.q8stcss     = idaa_base->q8st.q8stcss;
+        ins_q8st.q8sttmud    = idaa_base->q8st.q8sttmud;
+        ins_q8st.q8sttmps    = idaa_base->q8st.q8sttmps;
+        ins_q8st.q8stcqls    = idaa_base->q8st.q8stcqls;
+        ins_q8st.q8stabhr    = idaa_base->q8st.q8stabhr;
+        ins_q8st.q8stanui    = idaa_base->q8st.q8stanui;
+        ins_q8st.q8stanuo    = idaa_base->q8st.q8stanuo;
+        ins_q8st.q8sttsa     = idaa_base->q8st.q8sttsa;
+        ins_q8st.q8stlsa     = idaa_base->q8st.q8stlsa;
+        ins_q8st.q8stvlcs    = idaa_base->q8st.q8stvlcs;
+
+        exec sql
+          insert into RIF.ifcid_0002_IDAA
+          values(current timestamp
+                ,:current_unix_time
+                ,:admin_info_ssid.subsystem_name
+                ,:ins_q8st.q8stname
+                ,:ins_q8st.q8stconn
+                ,:ins_q8st.q8streq
+                ,:ins_q8st.q8sttout
+                ,:ins_q8st.q8stfail
+                ,:ins_q8st.q8stbyts
+                ,:ins_q8st.q8stbytr
+                ,:ins_q8st.q8stmsgs
+                ,:ins_q8st.q8stmsgr
+                ,:ins_q8st.q8stblks
+                ,:ins_q8st.q8stblkr
+                ,:ins_q8st.q8strows
+                ,:ins_q8st.q8strowr
+                ,:ins_q8st.q8stnlrs
+                ,:ins_q8st.q8stnlra
+                ,:ins_q8st.q8stnlts
+                ,:ins_q8st.q8stnlta
+                ,:ins_q8st.q8stnbs
+                ,:ins_q8st.q8stnba
+                ,:ins_q8st.q8stnis
+                ,:ins_q8st.q8stnia
+                ,:ins_q8st.q8stnus
+                ,:ins_q8st.q8stnua
+                ,:ins_q8st.q8stnds
+                ,:ins_q8st.q8stnda
+                ,:ins_q8st.q8stinsc
+                ,:ins_q8st.q8stupdc
+                ,:ins_q8st.q8stdelc
+                ,:ins_q8st.q8stdrpc
+                ,:ins_q8st.q8stcrtc
+                ,:ins_q8st.q8stcmtc
+                ,:ins_q8st.q8strbkc
+                ,:ins_q8st.q8stopnc
+                ,:ins_q8st.q8stoflw
+                ,:ins_q8st.q8sttdps
+                ,:ins_q8st.q8stedps
+                ,:ins_q8st.q8sttdpa
+                ,:ins_q8st.q8stedpa
+                ,:ins_q8st.q8sttate
+                ,:ins_q8st.q8stquew
+                ,:ins_q8st.q8stquem
+                ,:ins_q8st.q8stcors
+                ,:ins_q8st.q8stdska
+                ,:ins_q8st.q8stdsku
+                ,:ins_q8st.q8stdskb
+                ,:ins_q8st.q8stnmds
+                ,:ins_q8st.q8stdsa
+                ,:ins_q8st.q8stcql
+                ,:ins_q8st.q8stwnod_64
+                ,:ins_q8st.q8stccpu_64
+                ,:ins_q8st.q8stwcpu_64
+                ,:ins_q8st.q8stcrl
+                ,:ins_q8st.q8stcss
+                ,:ins_q8st.q8sttmud
+                ,:ins_q8st.q8sttmps
+                ,:ins_q8st.q8stcqls
+                ,:ins_q8st.q8stabhr
+                ,:ins_q8st.q8stanui
+                ,:ins_q8st.q8stanuo
+                ,:ins_q8st.q8sttsa
+                ,:ins_q8st.q8stlsa
+                ,:ins_q8st.q8stvlcs
+                ,:ins_q8st.q8stsreq
+                ,:ins_q8st.q8stfreq
+                ,:ins_q8st.q8stnqsa
+                ,:ins_q8st.q8stnqfa
+                ,:ins_q8st.q8stnqcs
+                ,:ins_q8st.q8stmnqs
+                ,:ins_q8st.q8stactv_64
+                ,:ins_q8st.q8stmaxa_64
+                ,:ins_q8st.q8sttcqs
+                ,:ins_q8st.q8sttcqa
+                ,:ins_q8st.q8sttcms
+                ,:ins_q8st.q8sttcma
+                ,:ins_q8st.q8sttccs
+                ,:ins_q8st.q8sttcca
+                ,:ins_q8st.q8stscpu
+                ,:ins_q8st.q8stsela
+                ,:ins_q8st.q8sttcpu
+                ,:ins_q8st.q8sttela
+                ,:ins_q8st.q8stacpu
+                ,:ins_q8st.q8staela
+                ,:ins_q8st.q8stawat
+                );
+
+        call checksql('Insert Q8ST',csql_warn);
+      end;
+
+
+
+      saved_Q8ST(i) = idaa_base->Q8ST;
+      base = idaa_base + base->next_block_offset;
+    end;
+  end processq8st;
+
+  /********************************************************************/
+  /* Q8ST based version                                               */
+  /********************************************************************/
+  dcl 1 q8st based,
+        2 q8stname_off unsigned bin fixed(16),
+        2 q8stprid    char(8),
+        2 *           char(6),
+        2 q8stconn    bin fixed(63),
+        2 q8streq     bin fixed(63),
+        2 q8sttout    bin fixed(63),
+        2 q8stfail    bin fixed(63),
+        2 q8stbyts    bin fixed(63),
+        2 q8stbytr    bin fixed(63),
+        2 q8stmsgs    bin fixed(63),
+        2 q8stmsgr    bin fixed(63),
+        2 q8stblks    bin fixed(63),
+        2 q8stblkr    bin fixed(63),
+        2 q8strows    bin fixed(63),
+        2 q8strowr    bin fixed(63),
+        2 q8stscpu    bin fixed(63),
+        2 q8stsela    bin fixed(63),
+        2 q8sttcpu    bin fixed(63),
+        2 q8sttela    bin fixed(63),
+        2 q8stacpu    bin fixed(63),
+        2 q8staela    bin fixed(63),
+        2 *           char(1),
+        2 q8sttate    char(1),
+        2 q8stactv    bin fixed(15),
+        2 q8stmaxa    bin fixed(15),
+        2 q8stavgq03  bin fixed(15),
+        2 q8stmaxq    bin fixed(15),
+        2 q8stccpu    bin fixed(15),
+        2 q8stskew    bin fixed(15),
+        2 q8stwcpu    bin fixed(15),
+        2 q8stwnod    bin fixed(15),
+        2 q8stavgq24  bin fixed(15),
+        2 *           bin fixed(31),
+        2 q8stquew    bin fixed(63),
+        2 q8stquem    bin fixed(63),
+        2 q8stmips    bin fixed(63),
+        2 q8stcors    bin fixed(63),
+        2 q8stsreq    bin fixed(63),
+        2 q8stfreq    bin fixed(63),
+        2 q8stfinv    bin fixed(63),
+        2 q8stdska    bin fixed(63),
+        2 q8stdsku    bin fixed(63),
+        2 q8stdskb    bin fixed(63),
+        2 q8stcpmu    bin fixed(63),
+        2 q8stnmds    bin fixed(63),
+        2 q8stwpmu    bin fixed(63),
+        2 q8stwsma    bin fixed(63),
+        2 q8stwsmu    bin fixed(63),
+        2 q8stwsmm    bin fixed(63),
+        2 q8stawat    bin fixed(63),
+        2 q8stnqsa    bin fixed(63),
+        2 q8stnqfa    bin fixed(63),
+        2 q8stnqcs    bin fixed(63),
+        2 q8stactv_64 bin fixed(63),
+        2 q8stmnqs    bin fixed(63),
+        2 q8stmaxa_64 bin fixed(63),
+        2 q8sttcqs    bin fixed(63),
+        2 q8sttcqa    bin fixed(63),
+        2 q8sttcms    bin fixed(63),
+        2 q8sttcma    bin fixed(63),
+        2 q8stdsa     bin fixed(63),
+        2 q8stmaxq_64 bin fixed(63),
+        2 q8stwnod_64 bin fixed(63),
+        2 q8stcql     bin fixed(63),
+        2 q8stccpu_64 bin fixed(63),
+        2 q8stwcpu_64 bin fixed(63),
+        2 q8sttccs    bin fixed(63),
+        2 q8sttcca    bin fixed(63),
+        2 q8stnlrs    bin fixed(63),
+        2 q8stnlra    bin fixed(63),
+        2 q8stnlts    bin fixed(63),
+        2 q8stnlta    bin fixed(63),
+        2 q8stnbs     bin fixed(63),
+        2 q8stnba     bin fixed(63),
+        2 q8stnis     bin fixed(63),
+        2 q8stnia     bin fixed(63),
+        2 q8stnus     bin fixed(63),
+        2 q8stnua     bin fixed(63),
+        2 q8stnds     bin fixed(63),
+        2 q8stnda     bin fixed(63),
+        2 q8stcrl     bin fixed(63),
+        2 q8stcss     char(1),
+        2 *           char(7),
+        2 q8sttlsc    char(10),
+        2 q8sttart    char(10),
+        2 q8sttatc    char(10),
+        2 *           char(2),
+        2 q8stinsc    bin fixed(63),
+        2 q8stupdc    bin fixed(63),
+        2 q8stdelc    bin fixed(63),
+        2 q8stdrpc    bin fixed(63),
+        2 q8stcrtc    bin fixed(63),
+        2 q8stcmtc    bin fixed(63),
+        2 q8strbkc    bin fixed(63),
+        2 q8stopnc    bin fixed(63),
+        2 q8sttmud    bin fixed(63),
+        2 q8sttmps    bin fixed(63),
+        2 q8stcqls    bin fixed(63),
+        2 q8stoflw    bin fixed(63),
+        2 q8stabhr    bin fixed(63),
+        2 q8stanui    bin fixed(63),
+        2 q8stanuo    bin fixed(63),
+        2 q8sttsa     bin fixed(63),
+        2 q8stlsa     bin fixed(63),
+        2 q8sttdps    bin fixed(63),
+        2 q8stedps    bin fixed(63),
+        2 q8sttdpa    bin fixed(63),
+        2 q8stedpa    bin fixed(63),
+        2 q8stvlcs    bin fixed(63),
+        2 *           char(24),
+        2 *           char(0);
+
+
+  /********************************************************************/
+  /* Q8ST saved version                                               */
+  /********************************************************************/
+  dcl 1 saved_q8st(4),
+        2 q8stname_off unsigned bin fixed(16),
+        2 q8stprid    char(8),
+        2 *           char(6),
+        2 q8stconn    bin fixed(63),
+        2 q8streq     bin fixed(63),
+        2 q8sttout    bin fixed(63),
+        2 q8stfail    bin fixed(63),
+        2 q8stbyts    bin fixed(63),
+        2 q8stbytr    bin fixed(63),
+        2 q8stmsgs    bin fixed(63),
+        2 q8stmsgr    bin fixed(63),
+        2 q8stblks    bin fixed(63),
+        2 q8stblkr    bin fixed(63),
+        2 q8strows    bin fixed(63),
+        2 q8strowr    bin fixed(63),
+        2 q8stscpu    bin fixed(63),
+        2 q8stsela    bin fixed(63),
+        2 q8sttcpu    bin fixed(63),
+        2 q8sttela    bin fixed(63),
+        2 q8stacpu    bin fixed(63),
+        2 q8staela    bin fixed(63),
+        2 *           char(1),
+        2 q8sttate    char(1),
+        2 q8stactv    bin fixed(15), /* for lower versions of idaa */
+        2 q8stmaxa    bin fixed(15), /* for lower versions of idaa */
+        2 q8stavgq03  bin fixed(15), /* for lower versions of idaa */
+        2 q8stmaxq    bin fixed(15), /* for lower versions of idaa */
+        2 q8stccpu    bin fixed(15), /* for lower versions of idaa */
+        2 q8stskew    bin fixed(15), /* for lower versions of idaa */
+        2 q8stwcpu    bin fixed(15), /* for lower versions of idaa */
+        2 q8stwnod    bin fixed(15), /* for lower versions of idaa */
+        2 q8stavgq24  bin fixed(15), /* for lower versions of idaa */
+        2 *           bin fixed(31),
+        2 q8stquew    bin fixed(63),
+        2 q8stquem    bin fixed(63),
+        2 q8stmips    bin fixed(63), /* for lower versions of idaa */
+        2 q8stcors    bin fixed(63),
+        2 q8stsreq    bin fixed(63),
+        2 q8stfreq    bin fixed(63),
+        2 q8stfinv    bin fixed(63),
+        2 q8stdska    bin fixed(63),
+        2 q8stdsku    bin fixed(63),
+        2 q8stdskb    bin fixed(63),
+        2 q8stcpmu    bin fixed(63),
+        2 q8stnmds    bin fixed(63),
+        2 q8stwpmu    bin fixed(63),
+        2 q8stwsma    bin fixed(63),
+        2 q8stwsmu    bin fixed(63),
+        2 q8stwsmm    bin fixed(63),
+        2 q8stawat    bin fixed(63),
+        2 q8stnqsa    bin fixed(63),
+        2 q8stnqfa    bin fixed(63),
+        2 q8stnqcs    bin fixed(63),
+        2 q8stactv_64 bin fixed(63),
+        2 q8stmnqs    bin fixed(63),
+        2 q8stmaxa_64 bin fixed(63),
+        2 q8sttcqs    bin fixed(63),
+        2 q8sttcqa    bin fixed(63),
+        2 q8sttcms    bin fixed(63),
+        2 q8sttcma    bin fixed(63),
+        2 q8stdsa     bin fixed(63),
+        2 q8stmaxq_64 bin fixed(63),
+        2 q8stwnod_64 bin fixed(63),
+        2 q8stcql     bin fixed(63),
+        2 q8stccpu_64 bin fixed(63),
+        2 q8stwcpu_64 bin fixed(63),
+        2 q8sttccs    bin fixed(63),
+        2 q8sttcca    bin fixed(63),
+        2 q8stnlrs    bin fixed(63),
+        2 q8stnlra    bin fixed(63),
+        2 q8stnlts    bin fixed(63),
+        2 q8stnlta    bin fixed(63),
+        2 q8stnbs     bin fixed(63),
+        2 q8stnba     bin fixed(63),
+        2 q8stnis     bin fixed(63),
+        2 q8stnia     bin fixed(63),
+        2 q8stnus     bin fixed(63),
+        2 q8stnua     bin fixed(63),
+        2 q8stnds     bin fixed(63),
+        2 q8stnda     bin fixed(63),
+        2 q8stcrl     bin fixed(63),
+        2 q8stcss     char(1),
+        2 *           char(7),
+        2 q8sttlsc    char(10),
+        2 q8sttart    char(10),
+        2 q8sttatc    char(10),
+        2 *           char(2),
+        2 q8stinsc    bin fixed(63),
+        2 q8stupdc    bin fixed(63),
+        2 q8stdelc    bin fixed(63),
+        2 q8stdrpc    bin fixed(63),
+        2 q8stcrtc    bin fixed(63),
+        2 q8stcmtc    bin fixed(63),
+        2 q8strbkc    bin fixed(63),
+        2 q8stopnc    bin fixed(63),
+        2 q8sttmud    bin fixed(63),
+        2 q8sttmps    bin fixed(63),
+        2 q8stcqls    bin fixed(63),
+        2 q8stoflw    bin fixed(63),
+        2 q8stabhr    bin fixed(63),
+        2 q8stanui    bin fixed(63),
+        2 q8stanuo    bin fixed(63),
+        2 q8sttsa     bin fixed(63),
+        2 q8stlsa     bin fixed(63),
+        2 q8sttdps    bin fixed(63),
+        2 q8stedps    bin fixed(63),
+        2 q8sttdpa    bin fixed(63),
+        2 q8stedpa    bin fixed(63),
+        2 q8stvlcs    bin fixed(63),
+        2 *           char(24),
+        2 *           char(0);
+
+
+  /********************************************************************/
+  /* Q8ST version for inserting                                       */
+  /********************************************************************/
+  dcl 1 ins_q8st,
+        2 q8stname    char(128) varying,
+        2 q8stconn    bin fixed(63),
+        2 q8streq     bin fixed(63),
+        2 q8sttout    bin fixed(63),
+        2 q8stfail    bin fixed(63),
+        2 q8stbyts    bin fixed(63),
+        2 q8stbytr    bin fixed(63),
+        2 q8stmsgs    bin fixed(63),
+        2 q8stmsgr    bin fixed(63),
+        2 q8stblks    bin fixed(63),
+        2 q8stblkr    bin fixed(63),
+        2 q8strows    bin fixed(63),
+        2 q8strowr    bin fixed(63),
+
+        2 q8stscpu    dec fixed(30,2),
+        2 q8stsela    dec fixed(30,2),
+        2 q8sttcpu    dec fixed(30,2),
+        2 q8sttela    dec fixed(30,2),
+        2 q8stacpu    dec fixed(30,2),
+        2 q8staela    dec fixed(30,2),
+        2 q8sttate    char(1),
+        2 q8stactv    bin fixed(15),
+        2 q8stmaxa    bin fixed(15),
+        2 q8stavgq03  bin fixed(15),
+        2 q8stmaxq    bin fixed(15),
+        2 q8stccpu    bin fixed(15),
+        2 q8stskew    bin fixed(15),
+        2 q8stwcpu    bin fixed(15),
+        2 q8stwnod    bin fixed(15),
+        2 q8stavgq24  bin fixed(15),
+        2 q8stquew    bin fixed(63),
+        2 q8stquem    bin fixed(63),
+        2 q8stmips    bin fixed(63),
+        2 q8stcors    bin fixed(63),
+        2 q8stsreq    bin fixed(63),
+        2 q8stfreq    bin fixed(63),
+        2 q8stfinv    bin fixed(63),
+        2 q8stdska    bin fixed(63),
+        2 q8stdsku    bin fixed(63),
+        2 q8stdskb    bin fixed(63),
+        2 q8stcpmu    bin fixed(63),
+        2 q8stnmds    bin fixed(63),
+        2 q8stwpmu    bin fixed(63),
+        2 q8stwsma    bin fixed(63),
+        2 q8stwsmu    bin fixed(63),
+        2 q8stwsmm    bin fixed(63),
+        2 q8stawat    dec fixed(30,2),
+        2 q8stnqsa    bin fixed(63),
+        2 q8stnqfa    bin fixed(63),
+        2 q8stnqcs    bin fixed(63),
+        2 q8stactv_64 bin fixed(63),
+        2 q8stmnqs    bin fixed(63),
+        2 q8stmaxa_64 bin fixed(63),
+        2 q8sttcqs    dec fixed(30,2),
+        2 q8sttcqa    dec fixed(30,2),
+        2 q8sttcms    dec fixed(30,2),
+        2 q8sttcma    dec fixed(30,2),
+        2 q8stdsa     bin fixed(63),
+        2 q8stmaxq_64 bin fixed(63),
+        2 q8stwnod_64 bin fixed(63),
+        2 q8stcql     bin fixed(63),
+        2 q8stccpu_64 bin fixed(63),
+        2 q8stwcpu_64 bin fixed(63),
+        2 q8sttccs    dec fixed(30,2),
+        2 q8sttcca    dec fixed(30,2),
+        2 q8stnlrs    bin fixed(63),
+        2 q8stnlra    bin fixed(63),
+        2 q8stnlts    bin fixed(63),
+        2 q8stnlta    bin fixed(63),
+        2 q8stnbs     bin fixed(63),
+        2 q8stnba     bin fixed(63),
+        2 q8stnis     bin fixed(63),
+        2 q8stnia     bin fixed(63),
+        2 q8stnus     bin fixed(63),
+        2 q8stnua     bin fixed(63),
+        2 q8stnds     bin fixed(63),
+        2 q8stnda     bin fixed(63),
+        2 q8stcrl     bin fixed(63),
+        2 q8stcss     char(1),
+        2 *           char(7),
+        2 q8stinsc    bin fixed(63),
+        2 q8stupdc    bin fixed(63),
+        2 q8stdelc    bin fixed(63),
+        2 q8stdrpc    bin fixed(63),
+        2 q8stcrtc    bin fixed(63),
+        2 q8stcmtc    bin fixed(63),
+        2 q8strbkc    bin fixed(63),
+        2 q8stopnc    bin fixed(63),
+        2 q8sttmud    bin fixed(63),
+        2 q8sttmps    bin fixed(63),
+        2 q8stcqls    bin fixed(63),
+        2 q8stoflw    bin fixed(63),
+        2 q8stabhr    bin fixed(63),
+        2 q8stanui    bin fixed(63),
+        2 q8stanuo    bin fixed(63),
+        2 q8sttsa     bin fixed(63),
+        2 q8stlsa     bin fixed(63),
+        2 q8sttdps    bin fixed(63),
+        2 q8stedps    bin fixed(63),
+        2 q8sttdpa    bin fixed(63),
+        2 q8stedpa    bin fixed(63),
+        2 q8stvlcs    bin fixed(63),
+        2 *           char(0);
+
+

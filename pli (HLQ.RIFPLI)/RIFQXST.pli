@@ -1,0 +1,957 @@
+  /********************************************************************/
+  /* Process the QXST subrecord.                                      */
+  /********************************************************************/
+  processQXST: procedure;
+    dcl base                               pointer;
+    dcl offs                               bin fixed(31,0);
+
+    base = ifi_base + smf_base->qws1.qws10r1o;
+
+    if (debug_mode = '1'b) then do;
+      put skip list('');
+      put skip list(time()
+                 !! ' RIF0001I - I - QXST.');
+
+      put skip list(time()
+                 !! ' RIF0001I - I - qws1.qws10r1o : '
+                 !! trim(smf_base->qws1.qws10r1o));
+      put skip list(time()
+                 !! ' RIF0001I - I - qws1.qws10r1l : '
+                 !! trim(smf_base->qws1.qws10r1l));
+      put skip list(time()
+                 !! ' RIF0001I - I - qws1.qws10r1n : '
+                 !! trim(smf_base->qws1.qws10r1n));
+    end;
+
+
+    if (firstItteration = false
+      & gather_QXST     = '1'b) then do;
+      /* Calculate the delta between the newly fetched IFI record and */
+      /* the saved previous itteration.                               */
+
+      ins_QXST.qxselect    = base->QXST.qxselect - saved_QXST.qxselect;
+      ins_QXST.qxinsrt     = base->QXST.qxinsrt  - saved_QXST.qxinsrt;
+      ins_QXST.qxupdte     = base->QXST.qxupdte  - saved_QXST.qxupdte;
+      ins_QXST.qxdelet     = base->QXST.qxdelet  - saved_QXST.qxdelet;
+      ins_QXST.qxdesc      = base->QXST.qxdesc   - saved_QXST.qxdesc;
+      ins_QXST.qxprep      = base->QXST.qxprep   - saved_QXST.qxprep;
+      ins_QXST.qxopen      = base->QXST.qxopen   - saved_QXST.qxopen;
+      ins_QXST.qxclose     = base->QXST.qxclose  - saved_QXST.qxclose;
+      ins_QXST.qxcrtab     = base->QXST.qxcrtab  - saved_QXST.qxcrtab;
+      ins_QXST.qxcrinx     = base->QXST.qxcrinx  - saved_QXST.qxcrinx;
+      ins_QXST.qxctabs     = base->QXST.qxctabs  - saved_QXST.qxctabs;
+      ins_QXST.qxcrsyn     = base->QXST.qxcrsyn  - saved_QXST.qxcrsyn;
+      ins_QXST.qxcrdab     = base->QXST.qxcrdab  - saved_QXST.qxcrdab;
+      ins_QXST.qxcrstg     = base->QXST.qxcrstg  - saved_QXST.qxcrstg;
+      ins_QXST.qxdefvu     = base->QXST.qxdefvu  - saved_QXST.qxdefvu;
+      ins_QXST.qxdrpix     = base->QXST.qxdrpix  - saved_QXST.qxdrpix;
+      ins_QXST.qxdrpta     = base->QXST.qxdrpta  - saved_QXST.qxdrpta;
+      ins_QXST.qxdrpts     = base->QXST.qxdrpts  - saved_QXST.qxdrpts;
+      ins_QXST.qxdrpdb     = base->QXST.qxdrpdb  - saved_QXST.qxdrpdb;
+      ins_QXST.qxdrpsy     = base->QXST.qxdrpsy  - saved_QXST.qxdrpsy;
+      ins_QXST.qxdrpst     = base->QXST.qxdrpst  - saved_QXST.qxdrpst;
+      ins_QXST.qxdrpvu     = base->QXST.qxdrpvu  - saved_QXST.qxdrpvu;
+      ins_QXST.qxaltst     = base->QXST.qxaltst  - saved_QXST.qxaltst;
+      ins_QXST.qxfetch     = base->QXST.qxfetch  - saved_QXST.qxfetch;
+      ins_QXST.qxaltts     = base->QXST.qxaltts  - saved_QXST.qxaltts;
+      ins_QXST.qxaltta     = base->QXST.qxaltta  - saved_QXST.qxaltta;
+      ins_QXST.qxaltix     = base->QXST.qxaltix  - saved_QXST.qxaltix;
+      ins_QXST.qxcmton     = base->QXST.qxcmton  - saved_QXST.qxcmton;
+      ins_QXST.qxlock      = base->QXST.qxlock   - saved_QXST.qxlock;
+      ins_QXST.qxgrant     = base->QXST.qxgrant  - saved_QXST.qxgrant;
+      ins_QXST.qxrevok     = base->QXST.qxrevok  - saved_QXST.qxrevok;
+      ins_QXST.qxincrb     = base->QXST.qxincrb  - saved_QXST.qxincrb;
+      ins_QXST.qxlabon     = base->QXST.qxlabon  - saved_QXST.qxlabon;
+      ins_QXST.qxsetsql    = base->QXST.qxsetsql - saved_QXST.qxsetsql;
+      ins_QXST.qxcrals     = base->QXST.qxcrals  - saved_QXST.qxcrals;
+      ins_QXST.qxdrpal     = base->QXST.qxdrpal  - saved_QXST.qxdrpal;
+      ins_QXST.qxsethv     = base->QXST.qxsethv  - saved_QXST.qxsethv;
+      ins_QXST.qxaldab     = base->QXST.qxaldab  - saved_QXST.qxaldab;
+      ins_QXST.qxdrppkg    = base->QXST.qxdrppkg - saved_QXST.qxdrppkg;
+      ins_QXST.qxdscrtb    = base->QXST.qxdscrtb - saved_QXST.qxdscrtb;
+      ins_QXST.qxmaxdeg    = base->QXST.qxmaxdeg - saved_QXST.qxmaxdeg;
+      ins_QXST.qxtotgrp    = base->QXST.qxtotgrp - saved_QXST.qxtotgrp;
+      ins_QXST.qxdegcur    = base->QXST.qxdegcur - saved_QXST.qxdegcur;
+      ins_QXST.qxdegesa    = base->QXST.qxdegesa - saved_QXST.qxdegesa;
+      ins_QXST.qxdegbuf    = base->QXST.qxdegbuf - saved_QXST.qxdegbuf;
+      ins_QXST.qxredgrp    = base->QXST.qxredgrp - saved_QXST.qxredgrp;
+      ins_QXST.qxnorgrp    = base->QXST.qxnorgrp - saved_QXST.qxnorgrp;
+      ins_QXST.qxcon1      = base->QXST.qxcon1   - saved_QXST.qxcon1;
+      ins_QXST.qxcon2      = base->QXST.qxcon2   - saved_QXST.qxcon2;
+      ins_QXST.qxrel       = base->QXST.qxrel    - saved_QXST.qxrel;
+      ins_QXST.qxsetcon    = base->QXST.qxsetcon - saved_QXST.qxsetcon;
+      ins_QXST.qxsetcdg    = base->QXST.qxsetcdg - saved_QXST.qxsetcdg;
+      ins_QXST.qxsetcrl    = base->QXST.qxsetcrl - saved_QXST.qxsetcrl;
+      ins_QXST.qxcall      = base->QXST.qxcall   - saved_QXST.qxcall;
+      ins_QXST.qxcallab    = base->QXST.qxcallab - saved_QXST.qxcallab;
+      ins_QXST.qxcallto    = base->QXST.qxcallto - saved_QXST.qxcallto;
+      ins_QXST.qxcallrj    = base->QXST.qxcallrj - saved_QXST.qxcallrj;
+      ins_QXST.qxcoorno    = base->QXST.qxcoorno - saved_QXST.qxcoorno;
+      ins_QXST.qxisorr     = base->QXST.qxisorr  - saved_QXST.qxisorr;
+      ins_QXST.qxcrgtt     = base->QXST.qxcrgtt  - saved_QXST.qxcrgtt;
+      ins_QXST.qxstreop    = base->QXST.qxstreop - saved_QXST.qxstreop;
+      ins_QXST.qxxcbpnx    = base->QXST.qxxcbpnx - saved_QXST.qxxcbpnx;
+      ins_QXST.qxxcskip    = base->QXST.qxxcskip - saved_QXST.qxxcskip;
+      ins_QXST.qxalocl     = base->QXST.qxalocl  - saved_QXST.qxalocl;
+      ins_QXST.qxalocc     = base->QXST.qxalocc  - saved_QXST.qxalocc;
+      ins_QXST.qxstfnd     = base->QXST.qxstfnd  - saved_QXST.qxstfnd;
+      ins_QXST.qxstnfnd    = base->QXST.qxstnfnd - saved_QXST.qxstnfnd;
+      ins_QXST.qxstiprp    = base->QXST.qxstiprp - saved_QXST.qxstiprp;
+      ins_QXST.qxstnprp    = base->QXST.qxstnprp - saved_QXST.qxstnprp;
+      ins_QXST.qxstdexp    = base->QXST.qxstdexp - saved_QXST.qxstdexp;
+      ins_QXST.qxstdinv    = base->QXST.qxstdinv - saved_QXST.qxstdinv;
+      ins_QXST.qxrepop1    = base->QXST.qxrepop1 - saved_QXST.qxrepop1;
+      ins_QXST.qxrepop2    = base->QXST.qxrepop2 - saved_QXST.qxrepop2;
+      ins_QXST.qxcratb     = base->QXST.qxcratb  - saved_QXST.qxcratb;
+      ins_QXST.qxstlobv    = base->QXST.qxstlobv - saved_QXST.qxstlobv;
+      ins_QXST.qxaludf     = base->QXST.qxaludf  - saved_QXST.qxaludf;
+      ins_QXST.qxalpro     = base->QXST.qxalpro  - saved_QXST.qxalpro;
+      ins_QXST.qxroimat    = base->QXST.qxroimat - saved_QXST.qxroimat;
+      ins_QXST.qxroiidx    = base->QXST.qxroiidx - saved_QXST.qxroiidx;
+      ins_QXST.qxroits     = base->QXST.qxroits  - saved_QXST.qxroits;
+      ins_QXST.qxsttrg     = base->QXST.qxsttrg  - saved_QXST.qxsttrg;
+      ins_QXST.qxrowtrg    = base->QXST.qxrowtrg - saved_QXST.qxrowtrg;
+      ins_QXST.qxtrgerr    = base->QXST.qxtrgerr - saved_QXST.qxtrgerr;
+      ins_QXST.qxcascdp    = base->QXST.qxcascdp - saved_QXST.qxcascdp;
+      ins_QXST.qxcaud      = base->QXST.qxcaud   - saved_QXST.qxcaud;
+      ins_QXST.qxcaudab    = base->QXST.qxcaudab - saved_QXST.qxcaudab;
+      ins_QXST.qxcaudto    = base->QXST.qxcaudto - saved_QXST.qxcaudto;
+      ins_QXST.qxcaudrj    = base->QXST.qxcaudrj - saved_QXST.qxcaudrj;
+      ins_QXST.qxsetcpr    = base->QXST.qxsetcpr - saved_QXST.qxsetcpr;
+      ins_QXST.qxdclgtt    = base->QXST.qxdclgtt - saved_QXST.qxdclgtt;
+      ins_QXST.qxdegdtt    = base->QXST.qxdegdtt - saved_QXST.qxdegdtt;
+      ins_QXST.qxcreseq    = base->QXST.qxcreseq - saved_QXST.qxcreseq;
+      ins_QXST.qxaltseq    = base->QXST.qxaltseq - saved_QXST.qxaltseq;
+      ins_QXST.qxdroseq    = base->QXST.qxdroseq - saved_QXST.qxdroseq;
+      ins_QXST.qxprresi    = base->QXST.qxprresi - saved_QXST.qxprresi;
+      ins_QXST.qxaltvw     = base->QXST.qxaltvw  - saved_QXST.qxaltvw;
+      ins_QXST.qxaltjr     = base->QXST.qxaltjr  - saved_QXST.qxaltjr;
+      ins_QXST.qxmerge     = base->QXST.qxmerge  - saved_QXST.qxmerge;
+      ins_QXST.qxtrtbl     = base->QXST.qxtrtbl  - saved_QXST.qxtrtbl;
+      ins_QXST.qxparopt    = base->QXST.qxparopt - saved_QXST.qxparopt;
+      ins_QXST.qxsistor    = base->QXST.qxsistor - saved_QXST.qxsistor;
+      ins_QXST.qxsiwf      = base->QXST.qxsiwf   - saved_QXST.qxsiwf;
+      ins_QXST.qxreftbl    = base->QXST.qxreftbl - saved_QXST.qxreftbl;
+      ins_QXST.qxtrnown    = base->QXST.qxtrnown - saved_QXST.qxtrnown;
+      ins_QXST.qxstcwlp    = base->QXST.qxstcwlp - saved_QXST.qxstcwlp;
+      ins_QXST.qxstcwlr    = base->QXST.qxstcwlr - saved_QXST.qxstcwlr;
+      ins_QXST.qxstcwlm    = base->QXST.qxstcwlm - saved_QXST.qxstcwlm;
+      ins_QXST.qxstcwld    = base->QXST.qxstcwld - saved_QXST.qxstcwld;
+      ins_QXST.qxwfrids    = base->QXST.qxwfrids - saved_QXST.qxwfrids;
+      ins_QXST.qxwfridt    = base->QXST.qxwfridt - saved_QXST.qxwfridt;
+      ins_QXST.qxhjincs    = base->QXST.qxhjincs - saved_QXST.qxhjincs;
+      ins_QXST.qxhjinct    = base->QXST.qxhjinct - saved_QXST.qxhjinct;
+      ins_QXST.qxrsmiap    = base->QXST.qxrsmiap - saved_QXST.qxrsmiap;
+      ins_QXST.qxcrtsv     = base->QXST.qxcrtsv  - saved_QXST.qxcrtsv;
+      ins_QXST.qxdrpsv     = base->QXST.qxdrpsv  - saved_QXST.qxdrpsv;
+      ins_QXST.qxdegat     = base->QXST.qxdegat  - saved_QXST.qxdegat;
+      ins_QXST.qxrsdmad    = base->QXST.qxrsdmad - saved_QXST.qxrsdmad;
+      ins_QXST.qxr1boad    = base->QXST.qxr1boad - saved_QXST.qxr1boad;
+      ins_QXST.qxstsfnd    = base->QXST.qxstsfnd - saved_QXST.qxstsfnd;
+      ins_QXST.qxrwsfetchd =
+               base->QXST.qxrwsfetchd - saved_QXST.qxrwsfetchd;
+      ins_QXST.qxrwsinsrtd =
+               base->QXST.qxrwsinsrtd - saved_QXST.qxrwsinsrtd;
+      ins_QXST.qxrwsupdtd  =
+               base->QXST.qxrwsupdtd  - saved_QXST.qxrwsupdtd;
+      ins_QXST.qxrwsdeletd =
+               base->QXST.qxrwsdeletd - saved_QXST.qxrwsdeletd;
+      ins_QXST.qxstarray_expansions =
+               base->QXST.qxstarray_expansions -
+               saved_QXST.qxstarray_expansions;
+      ins_QXST.qxstoredgrp =
+               base->QXST.qxstoredgrp - saved_QXST.qxstoredgrp;
+      ins_QXST.qxstodgngrp =
+               base->QXST.qxstodgngrp - saved_QXST.qxstodgngrp;
+      ins_QXST.qxmaxestidg =
+               base->QXST.qxmaxestidg - saved_QXST.qxmaxestidg;
+      ins_QXST.qxmaxplandg =
+               base->QXST.qxmaxplandg - saved_QXST.qxmaxplandg;
+      ins_QXST.qxrwsinsrtdalg1 =
+               base->QXST.qxrwsinsrtdalg1 - saved_QXST.qxrwsinsrtdalg1;
+      ins_QXST.qxrwsinsrtdalg2 =
+               base->QXST.qxrwsinsrtdalg2 - saved_QXST.qxrwsinsrtdalg2;
+      ins_QXST.qxstehlst   =
+               base->QXST.qxstehlst - saved_QXST.qxstehlst;
+      ins_QXST.qxsthvlst   =
+               base->QXST.qxsthvlst - saved_QXST.qxsthvlst;
+
+      exec sql
+        insert into RIF.ifcid_0002_sql_data
+        values(current timestamp
+              ,:current_unix_time
+              ,:admin_info_ssid.subsystem_name
+              ,:ins_QXST.qxselect
+              ,:ins_QXST.qxinsrt
+              ,:ins_QXST.qxupdte
+              ,:ins_QXST.qxdelet
+              ,:ins_QXST.qxdesc
+              ,:ins_QXST.qxprep
+              ,:ins_QXST.qxopen
+              ,:ins_QXST.qxclose
+              ,:ins_QXST.qxcrtab
+              ,:ins_QXST.qxcrinx
+              ,:ins_QXST.qxctabs
+              ,:ins_QXST.qxcrsyn
+              ,:ins_QXST.qxcrdab
+              ,:ins_QXST.qxcrstg
+              ,:ins_QXST.qxdefvu
+              ,:ins_QXST.qxdrpix
+              ,:ins_QXST.qxdrpta
+              ,:ins_QXST.qxdrpts
+              ,:ins_QXST.qxdrpdb
+              ,:ins_QXST.qxdrpsy
+              ,:ins_QXST.qxdrpst
+              ,:ins_QXST.qxdrpvu
+              ,:ins_QXST.qxaltst
+              ,:ins_QXST.qxfetch
+              ,:ins_QXST.qxaltts
+              ,:ins_QXST.qxaltta
+              ,:ins_QXST.qxaltix
+              ,:ins_QXST.qxcmton
+              ,:ins_QXST.qxlock
+              ,:ins_QXST.qxgrant
+              ,:ins_QXST.qxrevok
+              ,:ins_QXST.qxincrb
+              ,:ins_QXST.qxlabon
+              ,:ins_QXST.qxsetsql
+              ,:ins_QXST.qxcrals
+              ,:ins_QXST.qxdrpal
+              ,:ins_QXST.qxsethv
+              ,:ins_QXST.qxaldab
+              ,:ins_QXST.qxdrppkg
+              ,:ins_QXST.qxdscrtb
+              ,:ins_QXST.qxmaxdeg
+              ,:ins_QXST.qxtotgrp
+              ,:ins_QXST.qxdegcur
+              ,:ins_QXST.qxdegesa
+              ,:ins_QXST.qxdegbuf
+              ,:ins_QXST.qxredgrp
+              ,:ins_QXST.qxnorgrp
+              ,:ins_QXST.qxcon1
+              ,:ins_QXST.qxcon2
+              ,:ins_QXST.qxrel
+              ,:ins_QXST.qxsetcon
+              ,:ins_QXST.qxsetcdg
+              ,:ins_QXST.qxsetcrl
+              ,:ins_QXST.qxcall
+              ,:ins_QXST.qxcallab
+              ,:ins_QXST.qxcallto
+              ,:ins_QXST.qxcallrj
+              ,:ins_QXST.qxcoorno
+              ,:ins_QXST.qxisorr
+              ,:ins_QXST.qxcrgtt
+              ,:ins_QXST.qxstreop
+              ,:ins_QXST.qxxcbpnx
+              ,:ins_QXST.qxxcskip
+              ,:ins_QXST.qxalocl
+              ,:ins_QXST.qxalocc
+              ,:ins_QXST.qxstfnd
+              ,:ins_QXST.qxstnfnd
+              ,:ins_QXST.qxstiprp
+              ,:ins_QXST.qxstnprp
+              ,:ins_QXST.qxstdexp
+              ,:ins_QXST.qxstdinv
+              ,:ins_QXST.qxrepop1
+              ,:ins_QXST.qxrepop2
+              ,:ins_QXST.qxcratb
+              ,:ins_QXST.qxstlobv
+              ,:ins_QXST.qxaludf
+              ,:ins_QXST.qxalpro
+              ,:ins_QXST.qxroimat
+              ,:ins_QXST.qxroiidx
+              ,:ins_QXST.qxroits
+              ,:ins_QXST.qxsttrg
+              ,:ins_QXST.qxrowtrg
+              ,:ins_QXST.qxtrgerr
+              ,:ins_QXST.qxcascdp
+              ,:ins_QXST.qxcaud
+              ,:ins_QXST.qxcaudab
+              ,:ins_QXST.qxcaudto
+              ,:ins_QXST.qxcaudrj
+              ,:ins_QXST.qxsetcpr
+              ,:ins_QXST.qxdclgtt
+              ,:ins_QXST.qxdegdtt
+              ,:ins_QXST.qxcreseq
+              ,:ins_QXST.qxaltseq
+              ,:ins_QXST.qxdroseq
+              ,:ins_QXST.qxprresi
+              ,:ins_QXST.qxaltvw
+              ,:ins_QXST.qxaltjr
+              ,:ins_QXST.qxmerge
+              ,:ins_QXST.qxtrtbl
+              ,:ins_QXST.qxrwsfetchd
+              ,:ins_QXST.qxrwsinsrtd
+              ,:ins_QXST.qxrwsupdtd
+              ,:ins_QXST.qxrwsdeletd
+              ,:ins_QXST.qxstcwlp
+              ,:ins_QXST.qxstcwlr
+              ,:ins_QXST.qxstcwlm
+              ,:ins_QXST.qxstcwld
+              ,:ins_QXST.qxwfrids
+              ,:ins_QXST.qxwfridt
+              ,:ins_QXST.qxhjincs
+              ,:ins_QXST.qxhjinct
+              ,:ins_QXST.qxrsmiap
+              ,:ins_QXST.qxcrtsv
+              ,:ins_QXST.qxdrpsv
+              ,:ins_QXST.qxdegat
+              ,:ins_QXST.qxstarray_expansions
+              ,:ins_QXST.qxstoredgrp
+              ,:ins_QXST.qxstodgngrp
+              ,:ins_QXST.qxmaxestidg
+              ,:ins_QXST.qxmaxplandg
+              ,:ins_QXST.qxparopt
+              ,:ins_QXST.qxsistor
+              ,:ins_QXST.qxsiwf
+              ,:ins_QXST.qxreftbl
+              ,:ins_QXST.qxtrnown
+              ,:ins_QXST.qxrwsinsrtdalg1
+              ,:ins_QXST.qxrwsinsrtdalg2
+              ,:ins_QXST.qxrsdmad
+              ,:ins_QXST.qxr1boad
+              ,:ins_QXST.qxstsfnd
+              ,:ins_QXST.qxstehlst
+              ,:ins_QXST.qxsthvlst
+              );
+
+      call checksql('Insert QXST',csql_warn);
+    end;
+
+    /* Save the current version for comparison in the next itteration.*/
+    saved_QXST = base->QXST;
+  end processQXST;
+
+  /********************************************************************/
+  /* QXST based version                                               */
+  /********************************************************************/
+   dcl 1 qxst based,
+         2 qxhead,
+           3 qxid                     char(2),
+           3 qxlen                    bin fixed(15),
+           3 qxeye                    char(4),
+         2 qxstats,
+           3 qxstats1,
+             4 qxselect               bin fixed(63),
+             4 qxinsrt                bin fixed(63),
+             4 qxupdte                bin fixed(63),
+             4 qxdelet                bin fixed(63),
+             4 qxdesc                 bin fixed(63),
+             4 qxprep                 bin fixed(63),
+             4 qxopen                 bin fixed(63),
+             4 qxclose                bin fixed(63),
+           3 qxstats2,
+             4 qxcrtab                bin fixed(63),
+             4 qxcrinx                bin fixed(63),
+             4 qxctabs                bin fixed(63),
+             4 qxcrsyn                bin fixed(63),
+             4 qxcrdab                bin fixed(63),
+             4 qxcrstg                bin fixed(63),
+             4 qxdefvu                bin fixed(63),
+             4 qxdrpix                bin fixed(63),
+             4 qxdrpta                bin fixed(63),
+             4 qxdrpts                bin fixed(63),
+             4 qxdrpdb                bin fixed(63),
+             4 qxdrpsy                bin fixed(63),
+             4 qxdrpst                bin fixed(63),
+             4 qxdrpvu                bin fixed(63),
+          3 qxstats3,
+             4 qxaltst                bin fixed(63),
+             4 qxfetch                bin fixed(63),
+             4 qxaltts                bin fixed(63),
+             4 qxaltta                bin fixed(63),
+             4 qxaltix                bin fixed(63),
+             4 qxcmton                bin fixed(63),
+             4 qxlock                 bin fixed(63),
+             4 qxgrant                bin fixed(63),
+             4 qxrevok                bin fixed(63),
+             4 qxincrb                bin fixed(63),
+             4 qxlabon                bin fixed(63),
+             4 qxsetsql               bin fixed(63),
+             4 qxcrals                bin fixed(63),
+             4 qxdrpal                bin fixed(63),
+           3 qxstats4,
+             4 qxmiap                 bin fixed(63),
+             4 qxnsmiap               bin fixed(63),
+             4 qxmrmiap               bin fixed(63),
+           3 qxstats5,
+             4 qxsethv                bin fixed(63),
+             4 qxaldab                bin fixed(63),
+             4 qxdrppkg               bin fixed(63),
+             4 qxdscrtb               bin fixed(63),
+           3 qxstats6,
+             4 qxmaxdeg               bin fixed(63),
+             4 qxtotgrp               bin fixed(63),
+             4 qxdegcur               bin fixed(63),
+             4 qxdegesa               bin fixed(63),
+             4 qxdegbuf               bin fixed(63),
+             4 qxredgrp               bin fixed(63),
+             4 qxnorgrp               bin fixed(63),
+           3 qxstats7,
+             4 qxcon1                 bin fixed(63),
+             4 qxcon2                 bin fixed(63),
+             4 qxrel                  bin fixed(63),
+             4 qxsetcon               bin fixed(63),
+             4 qxsetcdg               bin fixed(63),
+             4 qxsetcrl               bin fixed(63),
+             4 qxcall                 bin fixed(63),
+             4 qxcallab               bin fixed(63),
+             4 qxcallto               bin fixed(63),
+             4 qxcallrj               bin fixed(63),
+           3 qxbytefg,
+             4 qxrlfdpa               char(1),
+             4 *                      char(7),
+           3 qxstats8,
+             4 qxcoorno               bin fixed(63),
+             4 qxisorr                bin fixed(63),
+             4 qxcrgtt                bin fixed(63),
+             4 qxstreop               bin fixed(63),
+             4 qxxcbpnx               bin fixed(63),
+             4 qxxcskip               bin fixed(63),
+             4 qxalocl                bin fixed(63),
+             4 qxalocc                bin fixed(63),
+             4 qxstfnd                bin fixed(63),
+             4 qxstnfnd               bin fixed(63),
+             4 qxstiprp               bin fixed(63),
+             4 qxstnprp               bin fixed(63),
+             4 qxstdexp               bin fixed(63),
+             4 qxstdinv               bin fixed(63),
+           3 qxstats9,
+             4 qxrntab                bin fixed(63),
+             4 qxctrig                bin fixed(63),
+             4 qxdrptr                bin fixed(63),
+             4 qxsetpth               bin fixed(63),
+             4 qxdrpfn                bin fixed(63),
+             4 qxdrppr                bin fixed(63),
+             4 qxcdist                bin fixed(63),
+             4 qxddist                bin fixed(63),
+             4 qxcrudf                bin fixed(63),
+             4 qxcrpro                bin fixed(63),
+             4 qxholdl                bin fixed(63),
+             4 qxfreel                bin fixed(63),
+           3 qxstats10,
+             4 qxrepop1               bin fixed(63),
+             4 qxrepop2               bin fixed(63),
+             4 qxcratb                bin fixed(63),
+             4 qxstlobv               bin fixed(63),
+             4 qxaludf                bin fixed(63),
+             4 qxalpro                bin fixed(63),
+             4 qxroimat               bin fixed(63),
+             4 qxroiidx               bin fixed(63),
+             4 qxroits                bin fixed(63),
+           3 qxstats11,
+             4 qxsttrg                bin fixed(63),
+             4 qxrowtrg               bin fixed(63),
+             4 qxtrgerr               bin fixed(63),
+             4 qxcascdp               bin fixed(63),
+             4 qxcaud                 bin fixed(63),
+             4 qxcaudab               bin fixed(63),
+             4 qxcaudto               bin fixed(63),
+             4 qxcaudrj               bin fixed(63),
+           3 qxstats12,
+             4 qxsetcpr               bin fixed(63),
+             4 qxdclgtt               bin fixed(63),
+             4 qxdegdtt               bin fixed(63),
+             4 qxcreseq               bin fixed(63),
+             4 qxaltseq               bin fixed(63),
+             4 qxdroseq               bin fixed(63),
+             4 qxprresi               bin fixed(63),
+             4 qxaltvw                bin fixed(63),
+             4 qxaltjr                bin fixed(63),
+             4 qxmerge                bin fixed(63),
+             4 qxtrtbl                bin fixed(63),
+           3 qxstats13,
+             4 qxcrrol                bin fixed(63),
+             4 qxdrprol               bin fixed(63),
+             4 qxcrctx                bin fixed(63),
+             4 qxaltctx               bin fixed(63),
+             4 qxdrpctx               bin fixed(63),
+             4 qxrnix                 bin fixed(63),
+             4 qxstxmlv               bin fixed(63),
+           3 qxstats14,
+             4 qxrwsfetchd            bin fixed(63),
+             4 qxrwsinsrtd            bin fixed(63),
+             4 qxrwsupdtd             bin fixed(63),
+             4 qxrwsdeletd            bin fixed(63),
+           3 qxstats15,
+             4 qxstcwlp               bin fixed(63),
+             4 qxstcwlr               bin fixed(63),
+             4 qxstcwlm               bin fixed(63),
+             4 qxstcwld               bin fixed(63),
+           3 qxstats16,
+             4 qxpfslnum              bin fixed(63),
+             4 qxpfsenum              bin fixed(63),
+             4 qxpfsenumg             bin fixed(63),
+             4 qxpfmaxu               bin fixed(63),
+             4 qxpfmaxug              bin fixed(63),
+           3 qxstats17,
+             4 qxwfrids               bin fixed(63),
+             4 qxwfridt               bin fixed(63),
+             4 qxhjincs               bin fixed(63),
+             4 qxhjinct               bin fixed(63),
+             4 qxrsmiap               bin fixed(63),
+           3 qxstats18,
+             4 qxcremp                bin fixed(63),
+             4 qxdrpmp                bin fixed(63),
+             4 qxaltmp                bin fixed(63),
+           3 qxstats19,
+             4 qxcrtsv                bin fixed(63),
+             4 qxdrpsv                bin fixed(63),
+             4 qxdegat                bin fixed(63),
+             4 qxstarray_expansions   bin fixed(63),
+             4 *                      char(8),
+           3 qxstats20,
+             4 qxstoredgrp            bin fixed(63),
+             4 qxstodgngrp            bin fixed(63),
+             4 qxmaxestidg            bin fixed(63),
+             4 qxmaxplandg            bin fixed(63),
+             4 qxparopt               bin fixed(63),
+           3 qxstats21,
+             4 qxn1093a               bin fixed(63),
+             4 qxn1093b               bin fixed(63),
+           3 qxstats22,
+             4 qxsistor               bin fixed(63),
+             4 qxsiwf                 bin fixed(63),
+           3 qxstats23,
+             4 qxreftbl               bin fixed(63),
+             4 qxtrnown               bin fixed(63),
+             4 qxrwsinsrtdalg1        bin fixed(63),
+             4 qxrwsinsrtdalg2        bin fixed(63),
+             4 *                      char(16),
+           3 qxstats24,
+             4 qxrsdmad               bin fixed(63),
+             4 qxr1boad               bin fixed(63),
+             4 *                      char(56),
+           3 qxstats25,
+             4 qxstsfnd               bin fixed(63),
+             4 *                      char(40),
+           3 qxstats26,
+             4 qxstehlst              bin fixed(63),
+             4 qxsthvlst              bin fixed(63),
+             4 *                      char(24),
+           3 *                        char(24),
+         2 qxstend  char(0);
+
+
+  /********************************************************************/
+  /* QXST saved version                                               */
+  /********************************************************************/
+   dcl 1 saved_qxst,
+         2 qxhead,
+           3 qxid                     char(2),
+           3 qxlen                    bin fixed(15),
+           3 qxeye                    char(4),
+         2 qxstats,
+           3 qxstats1,
+             4 qxselect               bin fixed(63),
+             4 qxinsrt                bin fixed(63),
+             4 qxupdte                bin fixed(63),
+             4 qxdelet                bin fixed(63),
+             4 qxdesc                 bin fixed(63),
+             4 qxprep                 bin fixed(63),
+             4 qxopen                 bin fixed(63),
+             4 qxclose                bin fixed(63),
+           3 qxstats2,
+             4 qxcrtab                bin fixed(63),
+             4 qxcrinx                bin fixed(63),
+             4 qxctabs                bin fixed(63),
+             4 qxcrsyn                bin fixed(63),
+             4 qxcrdab                bin fixed(63),
+             4 qxcrstg                bin fixed(63),
+             4 qxdefvu                bin fixed(63),
+             4 qxdrpix                bin fixed(63),
+             4 qxdrpta                bin fixed(63),
+             4 qxdrpts                bin fixed(63),
+             4 qxdrpdb                bin fixed(63),
+             4 qxdrpsy                bin fixed(63),
+             4 qxdrpst                bin fixed(63),
+             4 qxdrpvu                bin fixed(63),
+          3 qxstats3,
+             4 qxaltst                bin fixed(63),
+             4 qxfetch                bin fixed(63),
+             4 qxaltts                bin fixed(63),
+             4 qxaltta                bin fixed(63),
+             4 qxaltix                bin fixed(63),
+             4 qxcmton                bin fixed(63),
+             4 qxlock                 bin fixed(63),
+             4 qxgrant                bin fixed(63),
+             4 qxrevok                bin fixed(63),
+             4 qxincrb                bin fixed(63),
+             4 qxlabon                bin fixed(63),
+             4 qxsetsql               bin fixed(63),
+             4 qxcrals                bin fixed(63),
+             4 qxdrpal                bin fixed(63),
+           3 qxstats4,
+             4 qxmiap                 bin fixed(63),
+             4 qxnsmiap               bin fixed(63),
+             4 qxmrmiap               bin fixed(63),
+           3 qxstats5,
+             4 qxsethv                bin fixed(63),
+             4 qxaldab                bin fixed(63),
+             4 qxdrppkg               bin fixed(63),
+             4 qxdscrtb               bin fixed(63),
+           3 qxstats6,
+             4 qxmaxdeg               bin fixed(63),
+             4 qxtotgrp               bin fixed(63),
+             4 qxdegcur               bin fixed(63),
+             4 qxdegesa               bin fixed(63),
+             4 qxdegbuf               bin fixed(63),
+             4 qxredgrp               bin fixed(63),
+             4 qxnorgrp               bin fixed(63),
+           3 qxstats7,
+             4 qxcon1                 bin fixed(63),
+             4 qxcon2                 bin fixed(63),
+             4 qxrel                  bin fixed(63),
+             4 qxsetcon               bin fixed(63),
+             4 qxsetcdg               bin fixed(63),
+             4 qxsetcrl               bin fixed(63),
+             4 qxcall                 bin fixed(63),
+             4 qxcallab               bin fixed(63),
+             4 qxcallto               bin fixed(63),
+             4 qxcallrj               bin fixed(63),
+           3 qxbytefg,
+             4 qxrlfdpa               char(1),
+             4 *                      char(7),
+           3 qxstats8,
+             4 qxcoorno               bin fixed(63),
+             4 qxisorr                bin fixed(63),
+             4 qxcrgtt                bin fixed(63),
+             4 qxstreop               bin fixed(63),
+             4 qxxcbpnx               bin fixed(63),
+             4 qxxcskip               bin fixed(63),
+             4 qxalocl                bin fixed(63),
+             4 qxalocc                bin fixed(63),
+             4 qxstfnd                bin fixed(63),
+             4 qxstnfnd               bin fixed(63),
+             4 qxstiprp               bin fixed(63),
+             4 qxstnprp               bin fixed(63),
+             4 qxstdexp               bin fixed(63),
+             4 qxstdinv               bin fixed(63),
+           3 qxstats9,
+             4 qxrntab                bin fixed(63),
+             4 qxctrig                bin fixed(63),
+             4 qxdrptr                bin fixed(63),
+             4 qxsetpth               bin fixed(63),
+             4 qxdrpfn                bin fixed(63),
+             4 qxdrppr                bin fixed(63),
+             4 qxcdist                bin fixed(63),
+             4 qxddist                bin fixed(63),
+             4 qxcrudf                bin fixed(63),
+             4 qxcrpro                bin fixed(63),
+             4 qxholdl                bin fixed(63),
+             4 qxfreel                bin fixed(63),
+           3 qxstats10,
+             4 qxrepop1               bin fixed(63),
+             4 qxrepop2               bin fixed(63),
+             4 qxcratb                bin fixed(63),
+             4 qxstlobv               bin fixed(63),
+             4 qxaludf                bin fixed(63),
+             4 qxalpro                bin fixed(63),
+             4 qxroimat               bin fixed(63),
+             4 qxroiidx               bin fixed(63),
+             4 qxroits                bin fixed(63),
+           3 qxstats11,
+             4 qxsttrg                bin fixed(63),
+             4 qxrowtrg               bin fixed(63),
+             4 qxtrgerr               bin fixed(63),
+             4 qxcascdp               bin fixed(63),
+             4 qxcaud                 bin fixed(63),
+             4 qxcaudab               bin fixed(63),
+             4 qxcaudto               bin fixed(63),
+             4 qxcaudrj               bin fixed(63),
+           3 qxstats12,
+             4 qxsetcpr               bin fixed(63),
+             4 qxdclgtt               bin fixed(63),
+             4 qxdegdtt               bin fixed(63),
+             4 qxcreseq               bin fixed(63),
+             4 qxaltseq               bin fixed(63),
+             4 qxdroseq               bin fixed(63),
+             4 qxprresi               bin fixed(63),
+             4 qxaltvw                bin fixed(63),
+             4 qxaltjr                bin fixed(63),
+             4 qxmerge                bin fixed(63),
+             4 qxtrtbl                bin fixed(63),
+           3 qxstats13,
+             4 qxcrrol                bin fixed(63),
+             4 qxdrprol               bin fixed(63),
+             4 qxcrctx                bin fixed(63),
+             4 qxaltctx               bin fixed(63),
+             4 qxdrpctx               bin fixed(63),
+             4 qxrnix                 bin fixed(63),
+             4 qxstxmlv               bin fixed(63),
+           3 qxstats14,
+             4 qxrwsfetchd            bin fixed(63),
+             4 qxrwsinsrtd            bin fixed(63),
+             4 qxrwsupdtd             bin fixed(63),
+             4 qxrwsdeletd            bin fixed(63),
+           3 qxstats15,
+             4 qxstcwlp               bin fixed(63),
+             4 qxstcwlr               bin fixed(63),
+             4 qxstcwlm               bin fixed(63),
+             4 qxstcwld               bin fixed(63),
+           3 qxstats16,
+             4 qxpfslnum              bin fixed(63),
+             4 qxpfsenum              bin fixed(63),
+             4 qxpfsenumg             bin fixed(63),
+             4 qxpfmaxu               bin fixed(63),
+             4 qxpfmaxug              bin fixed(63),
+           3 qxstats17,
+             4 qxwfrids               bin fixed(63),
+             4 qxwfridt               bin fixed(63),
+             4 qxhjincs               bin fixed(63),
+             4 qxhjinct               bin fixed(63),
+             4 qxrsmiap               bin fixed(63),
+           3 qxstats18,
+             4 qxcremp                bin fixed(63),
+             4 qxdrpmp                bin fixed(63),
+             4 qxaltmp                bin fixed(63),
+           3 qxstats19,
+             4 qxcrtsv                bin fixed(63),
+             4 qxdrpsv                bin fixed(63),
+             4 qxdegat                bin fixed(63),
+             4 qxstarray_expansions   bin fixed(63),
+             4 *                      char(8),
+           3 qxstats20,
+             4 qxstoredgrp            bin fixed(63),
+             4 qxstodgngrp            bin fixed(63),
+             4 qxmaxestidg            bin fixed(63),
+             4 qxmaxplandg            bin fixed(63),
+             4 qxparopt               bin fixed(63),
+           3 qxstats21,
+             4 qxn1093a               bin fixed(63),
+             4 qxn1093b               bin fixed(63),
+           3 qxstats22,
+             4 qxsistor               bin fixed(63),
+             4 qxsiwf                 bin fixed(63),
+           3 qxstats23,
+             4 qxreftbl               bin fixed(63),
+             4 qxtrnown               bin fixed(63),
+             4 qxrwsinsrtdalg1        bin fixed(63),
+             4 qxrwsinsrtdalg2        bin fixed(63),
+             4 *                      char(16),
+           3 qxstats24,
+             4 qxrsdmad               bin fixed(63),
+             4 qxr1boad               bin fixed(63),
+             4 *                      char(56),
+           3 qxstats25,
+             4 qxstsfnd               bin fixed(63),
+             4 *                      char(40),
+           3 qxstats26,
+             4 qxstehlst              bin fixed(63),
+             4 qxsthvlst              bin fixed(63),
+             4 *                      char(24),
+           3 *                        char(24),
+         2 qxstend  char(0);
+
+
+  /********************************************************************/
+  /* QXST version for inserting                                       */
+  /********************************************************************/
+   dcl 1 ins_qxst,
+         2 qxhead,
+           3 qxid                     char(2),
+           3 qxlen                    bin fixed(15),
+           3 qxeye                    char(4),
+         2 qxstats,
+           3 qxstats1,
+             4 qxselect               bin fixed(63),
+             4 qxinsrt                bin fixed(63),
+             4 qxupdte                bin fixed(63),
+             4 qxdelet                bin fixed(63),
+             4 qxdesc                 bin fixed(63),
+             4 qxprep                 bin fixed(63),
+             4 qxopen                 bin fixed(63),
+             4 qxclose                bin fixed(63),
+           3 qxstats2,
+             4 qxcrtab                bin fixed(63),
+             4 qxcrinx                bin fixed(63),
+             4 qxctabs                bin fixed(63),
+             4 qxcrsyn                bin fixed(63),
+             4 qxcrdab                bin fixed(63),
+             4 qxcrstg                bin fixed(63),
+             4 qxdefvu                bin fixed(63),
+             4 qxdrpix                bin fixed(63),
+             4 qxdrpta                bin fixed(63),
+             4 qxdrpts                bin fixed(63),
+             4 qxdrpdb                bin fixed(63),
+             4 qxdrpsy                bin fixed(63),
+             4 qxdrpst                bin fixed(63),
+             4 qxdrpvu                bin fixed(63),
+          3 qxstats3,
+             4 qxaltst                bin fixed(63),
+             4 qxfetch                bin fixed(63),
+             4 qxaltts                bin fixed(63),
+             4 qxaltta                bin fixed(63),
+             4 qxaltix                bin fixed(63),
+             4 qxcmton                bin fixed(63),
+             4 qxlock                 bin fixed(63),
+             4 qxgrant                bin fixed(63),
+             4 qxrevok                bin fixed(63),
+             4 qxincrb                bin fixed(63),
+             4 qxlabon                bin fixed(63),
+             4 qxsetsql               bin fixed(63),
+             4 qxcrals                bin fixed(63),
+             4 qxdrpal                bin fixed(63),
+           3 qxstats4,
+             4 qxmiap                 bin fixed(63),
+             4 qxnsmiap               bin fixed(63),
+             4 qxmrmiap               bin fixed(63),
+           3 qxstats5,
+             4 qxsethv                bin fixed(63),
+             4 qxaldab                bin fixed(63),
+             4 qxdrppkg               bin fixed(63),
+             4 qxdscrtb               bin fixed(63),
+           3 qxstats6,
+             4 qxmaxdeg               bin fixed(63),
+             4 qxtotgrp               bin fixed(63),
+             4 qxdegcur               bin fixed(63),
+             4 qxdegesa               bin fixed(63),
+             4 qxdegbuf               bin fixed(63),
+             4 qxredgrp               bin fixed(63),
+             4 qxnorgrp               bin fixed(63),
+           3 qxstats7,
+             4 qxcon1                 bin fixed(63),
+             4 qxcon2                 bin fixed(63),
+             4 qxrel                  bin fixed(63),
+             4 qxsetcon               bin fixed(63),
+             4 qxsetcdg               bin fixed(63),
+             4 qxsetcrl               bin fixed(63),
+             4 qxcall                 bin fixed(63),
+             4 qxcallab               bin fixed(63),
+             4 qxcallto               bin fixed(63),
+             4 qxcallrj               bin fixed(63),
+           3 qxbytefg,
+             4 qxrlfdpa               char(1),
+             4 *                      char(7),
+           3 qxstats8,
+             4 qxcoorno               bin fixed(63),
+             4 qxisorr                bin fixed(63),
+             4 qxcrgtt                bin fixed(63),
+             4 qxstreop               bin fixed(63),
+             4 qxxcbpnx               bin fixed(63),
+             4 qxxcskip               bin fixed(63),
+             4 qxalocl                bin fixed(63),
+             4 qxalocc                bin fixed(63),
+             4 qxstfnd                bin fixed(63),
+             4 qxstnfnd               bin fixed(63),
+             4 qxstiprp               bin fixed(63),
+             4 qxstnprp               bin fixed(63),
+             4 qxstdexp               bin fixed(63),
+             4 qxstdinv               bin fixed(63),
+           3 qxstats9,
+             4 qxrntab                bin fixed(63),
+             4 qxctrig                bin fixed(63),
+             4 qxdrptr                bin fixed(63),
+             4 qxsetpth               bin fixed(63),
+             4 qxdrpfn                bin fixed(63),
+             4 qxdrppr                bin fixed(63),
+             4 qxcdist                bin fixed(63),
+             4 qxddist                bin fixed(63),
+             4 qxcrudf                bin fixed(63),
+             4 qxcrpro                bin fixed(63),
+             4 qxholdl                bin fixed(63),
+             4 qxfreel                bin fixed(63),
+           3 qxstats10,
+             4 qxrepop1               bin fixed(63),
+             4 qxrepop2               bin fixed(63),
+             4 qxcratb                bin fixed(63),
+             4 qxstlobv               bin fixed(63),
+             4 qxaludf                bin fixed(63),
+             4 qxalpro                bin fixed(63),
+             4 qxroimat               bin fixed(63),
+             4 qxroiidx               bin fixed(63),
+             4 qxroits                bin fixed(63),
+           3 qxstats11,
+             4 qxsttrg                bin fixed(63),
+             4 qxrowtrg               bin fixed(63),
+             4 qxtrgerr               bin fixed(63),
+             4 qxcascdp               bin fixed(63),
+             4 qxcaud                 bin fixed(63),
+             4 qxcaudab               bin fixed(63),
+             4 qxcaudto               bin fixed(63),
+             4 qxcaudrj               bin fixed(63),
+           3 qxstats12,
+             4 qxsetcpr               bin fixed(63),
+             4 qxdclgtt               bin fixed(63),
+             4 qxdegdtt               bin fixed(63),
+             4 qxcreseq               bin fixed(63),
+             4 qxaltseq               bin fixed(63),
+             4 qxdroseq               bin fixed(63),
+             4 qxprresi               bin fixed(63),
+             4 qxaltvw                bin fixed(63),
+             4 qxaltjr                bin fixed(63),
+             4 qxmerge                bin fixed(63),
+             4 qxtrtbl                bin fixed(63),
+           3 qxstats13,
+             4 qxcrrol                bin fixed(63),
+             4 qxdrprol               bin fixed(63),
+             4 qxcrctx                bin fixed(63),
+             4 qxaltctx               bin fixed(63),
+             4 qxdrpctx               bin fixed(63),
+             4 qxrnix                 bin fixed(63),
+             4 qxstxmlv               bin fixed(63),
+           3 qxstats14,
+             4 qxrwsfetchd            bin fixed(63),
+             4 qxrwsinsrtd            bin fixed(63),
+             4 qxrwsupdtd             bin fixed(63),
+             4 qxrwsdeletd            bin fixed(63),
+           3 qxstats15,
+             4 qxstcwlp               bin fixed(63),
+             4 qxstcwlr               bin fixed(63),
+             4 qxstcwlm               bin fixed(63),
+             4 qxstcwld               bin fixed(63),
+           3 qxstats16,
+             4 qxpfslnum              bin fixed(63),
+             4 qxpfsenum              bin fixed(63),
+             4 qxpfsenumg             bin fixed(63),
+             4 qxpfmaxu               bin fixed(63),
+             4 qxpfmaxug              bin fixed(63),
+           3 qxstats17,
+             4 qxwfrids               bin fixed(63),
+             4 qxwfridt               bin fixed(63),
+             4 qxhjincs               bin fixed(63),
+             4 qxhjinct               bin fixed(63),
+             4 qxrsmiap               bin fixed(63),
+           3 qxstats18,
+             4 qxcremp                bin fixed(63),
+             4 qxdrpmp                bin fixed(63),
+             4 qxaltmp                bin fixed(63),
+           3 qxstats19,
+             4 qxcrtsv                bin fixed(63),
+             4 qxdrpsv                bin fixed(63),
+             4 qxdegat                bin fixed(63),
+             4 qxstarray_expansions   bin fixed(63),
+             4 *                      char(8),
+           3 qxstats20,
+             4 qxstoredgrp            bin fixed(63),
+             4 qxstodgngrp            bin fixed(63),
+             4 qxmaxestidg            bin fixed(63),
+             4 qxmaxplandg            bin fixed(63),
+             4 qxparopt               bin fixed(63),
+           3 qxstats21,
+             4 qxn1093a               bin fixed(63),
+             4 qxn1093b               bin fixed(63),
+           3 qxstats22,
+             4 qxsistor               bin fixed(63),
+             4 qxsiwf                 bin fixed(63),
+           3 qxstats23,
+             4 qxreftbl               bin fixed(63),
+             4 qxtrnown               bin fixed(63),
+             4 qxrwsinsrtdalg1        bin fixed(63),
+             4 qxrwsinsrtdalg2        bin fixed(63),
+             4 *                      char(16),
+           3 qxstats24,
+             4 qxrsdmad               bin fixed(63),
+             4 qxr1boad               bin fixed(63),
+             4 *                      char(56),
+           3 qxstats25,
+             4 qxstsfnd               bin fixed(63),
+             4 *                      char(40),
+           3 qxstats26,
+             4 qxstehlst              bin fixed(63),
+             4 qxsthvlst              bin fixed(63),
+             4 *                      char(24),
+           3 *                        char(24),
+         2 qxstend  char(0);
+
+

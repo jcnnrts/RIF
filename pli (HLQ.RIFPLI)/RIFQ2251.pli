@@ -1,0 +1,234 @@
+  /********************************************************************/
+  /* Process 0225 data section 1.                                     */
+  /********************************************************************/
+  processQW02251: procedure;
+    dcl i                                  bin fixed(31,0);
+    dcl base                               pointer;
+
+    base = ifi_base + smf_base->qw03225.qw02251o;
+
+    if (debug_mode = '1'b) then do;
+      put skip list('');
+      put skip list(time()
+                 !! ' RIF0001I - I - qw03225.');
+
+      put skip list(time()
+                 !! ' RIF0001I - I - qw03225.qw02251o : '
+                 !! trim(smf_base->qw03225.qw02251o));
+      put skip list(time()
+                 !! ' RIF0001I - I - qw03225.qw02251l : '
+                 !! trim(smf_base->qw03225.qw02251l));
+      put skip list(time()
+                 !! ' RIF0001I - I - qw03225.qw02251n : '
+                 !! trim(smf_base->qw03225.qw02251n));
+    end;
+
+    if (gather_QW02251 = '1'b) then do;
+
+      do i = 1 to smf_base->qw03225.qw02251n;
+
+        /* Calculate the delta between the newly fetched IFI record   */
+        /* and the saved previous itteration.                         */
+
+        ins_qw02251.qw0225an = base->qw02251.qw0225an;
+        ins_qw02251.qw0225rg = base->qw02251.qw0225rg;
+        ins_qw02251.qw0225lo = base->qw02251.qw0225lo;
+        ins_qw02251.qw0225hi = base->qw02251.qw0225hi;
+        ins_qw02251.qw0225el = base->qw02251.qw0225el;
+        ins_qw02251.qw0225eh = base->qw02251.qw0225eh;
+        ins_qw02251.qw0225cr = base->qw02251.qw0225cr;
+        ins_qw02251.qw0225mv = base->qw02251.qw0225mv;
+        ins_qw02251.qw0225so = base->qw02251.qw0225so;
+        ins_qw02251.qw0225gs = base->qw02251.qw0225gs;
+        ins_qw02251.qw0225su = base->qw02251.qw0225su;
+        ins_qw02251.qw0225vr = base->qw02251.qw0225vr;
+        ins_qw02251.qw0225fx = base->qw02251.qw0225fx;
+        ins_qw02251.qw0225gm = base->qw02251.qw0225gm;
+        ins_qw02251.qw0225av = base->qw02251.qw0225av;
+        ins_qw02251.qw0225ss = base->qw02251.qw0225ss;
+        ins_qw02251.qw0225va = base->qw02251.qw0225va;
+        ins_qw02251.qw0225fa = base->qw02251.qw0225fa;
+        ins_qw02251.qw0225ga = base->qw02251.qw0225ga;
+        ins_qw02251.qw0225sm = base->qw02251.qw0225sm;
+        ins_qw02251.qw0225rl = base->qw02251.qw0225rl;
+        ins_qw02251.qw0225ax = base->qw02251.qw0225ax;
+
+        ins_qw02251.qw0225hvpagesinreal
+          = base->qw02251.qw0225hvpagesinreal  ;
+        ins_qw02251.qw0225hvauxslots
+          = base->qw02251.qw0225hvauxslots     ;
+        ins_qw02251.qw0225hvgpagesinreal
+          = base->qw02251.qw0225hvgpagesinreal ;
+        ins_qw02251.qw0225hvgauxslots
+          = base->qw02251.qw0225hvgauxslots    ;
+        ins_qw02251.qw0225pristg_real
+          = base->qw02251.qw0225pristg_real    ;
+        ins_qw02251.qw0225pristg_aux
+          = base->qw02251.qw0225pristg_aux     ;
+        ins_qw02251.qw0225hvpagesinreal2g
+          = base->qw02251.qw0225hvpagesinreal2g;
+        ins_qw02251.qw0225pristg_dpage
+          = base->qw02251.qw0225pristg_dpage   ;
+
+        exec sql
+          insert into RIF.ifcid_0225_address_space_summary
+                (
+                 insert_ts
+                ,unix_time
+                ,subsystem
+                ,qw0225an
+                ,qw0225rg
+                ,qw0225lo
+                ,qw0225hi
+                ,qw0225el
+                ,qw0225eh
+                ,qw0225cr
+                ,qw0225mv
+                ,qw0225so
+                ,qw0225gs
+                ,qw0225su
+                ,qw0225vr
+                ,qw0225fx
+                ,qw0225gm
+                ,qw0225av
+                ,qw0225ss
+                ,qw0225va
+                ,qw0225fa
+                ,qw0225ga
+                ,qw0225sm
+                ,qw0225rl
+                ,qw0225ax
+                ,qw0225hvpagesinreal
+                ,qw0225hvauxslots
+                ,qw0225hvgpagesinreal
+                ,qw0225hvgauxslots
+                ,qw0225pristg_real
+                ,qw0225pristg_aux
+                ,qw0225hvpagesinreal2g
+                ,qw0225pristg_dpage
+                )
+          values(current timestamp
+                ,:current_unix_time
+                ,:admin_info_ssid.subsystem_name
+                ,:ins_qw02251.qw0225an
+                ,:ins_qw02251.qw0225rg
+                ,:ins_qw02251.qw0225lo
+                ,:ins_qw02251.qw0225hi
+                ,:ins_qw02251.qw0225el
+                ,:ins_qw02251.qw0225eh
+                ,:ins_qw02251.qw0225cr
+                ,:ins_qw02251.qw0225mv
+                ,:ins_qw02251.qw0225so
+                ,:ins_qw02251.qw0225gs
+                ,:ins_qw02251.qw0225su
+                ,:ins_qw02251.qw0225vr
+                ,:ins_qw02251.qw0225fx
+                ,:ins_qw02251.qw0225gm
+                ,:ins_qw02251.qw0225av
+                ,:ins_qw02251.qw0225ss
+                ,:ins_qw02251.qw0225va
+                ,:ins_qw02251.qw0225fa
+                ,:ins_qw02251.qw0225ga
+                ,:ins_qw02251.qw0225sm
+                ,:ins_qw02251.qw0225rl
+                ,:ins_qw02251.qw0225ax
+                ,:ins_qw02251.qw0225hvpagesinreal
+                ,:ins_qw02251.qw0225hvauxslots
+                ,:ins_qw02251.qw0225hvgpagesinreal
+                ,:ins_qw02251.qw0225hvgauxslots
+                ,:ins_qw02251.qw0225pristg_real
+                ,:ins_qw02251.qw0225pristg_aux
+                ,:ins_qw02251.qw0225hvpagesinreal2g
+                ,:ins_qw02251.qw0225pristg_dpage
+                );
+
+        call checksql('Insert qw02251',csql_warn);
+
+        /* Move to next offset = second address space.                */
+        base += smf_base->qw03225.qw02251l;
+
+      end;
+    end;
+
+  end processQW02251;
+
+  /********************************************************************/
+  /* Q225 section 1 based version                                     */
+  /********************************************************************/
+  dcl 1 qw02251 based,
+        3 qw0225an              char(4),
+        3 qw0225rg              bin fixed(31),
+        3 qw0225lo              bin fixed(31),
+        3 qw0225hi              bin fixed(31),
+        3 qw0225el              bin fixed(31),
+        3 qw0225eh              bin fixed(31),
+        3 qw0225tp              ptr,
+        3 qw0225ep              ptr,
+        3 qw0225cr              bin fixed(31),
+        3 qw0225mv              bin fixed(31),
+        3 qw0225so              bin fixed(31),
+        3 qw0225gs              bin fixed(31),
+        3 qw0225su              bin fixed(31),
+        3 qw0225vr              bin fixed(31),
+        3 qw0225fx              bin fixed(31),
+        3 qw0225gm              bin fixed(31),
+        3 qw0225av              bin fixed(31),
+        3 qw0225ss              bin fixed(31),
+        3 qw0225va              bin fixed(63),
+        3 qw0225fa              bin fixed(63),
+        3 qw0225ga              bin fixed(63),
+        3 qw0225sm              bin fixed(63),
+        3 qw0225rl              bin fixed(63),
+        3 qw0225ax              bin fixed(63),
+        3 qw0225hvpagesinreal   bin fixed(63),
+        3 qw0225hvauxslots      bin fixed(63),
+        3 qw0225hvgpagesinreal  bin fixed(63),
+        3 qw0225hvgauxslots     bin fixed(63),
+        3 qw0225pristg_real     bin fixed(63),
+        3 qw0225pristg_aux      bin fixed(63),
+        3 qw02251flgs           bit(32),
+        3 *                     char(4),
+        3 qw0225hvpagesinreal2g bin fixed(63),
+        3 qw0225pristg_dpage    bin fixed(63);
+
+
+  /********************************************************************/
+  /* Q225 section 1 insert version                                    */
+  /********************************************************************/
+  dcl 1 ins_qw02251,
+        3 qw0225an              char(4),
+        3 qw0225rg              bin fixed(31),
+        3 qw0225lo              bin fixed(31),
+        3 qw0225hi              bin fixed(31),
+        3 qw0225el              bin fixed(31),
+        3 qw0225eh              bin fixed(31),
+        3 qw0225tp              ptr,
+        3 qw0225ep              ptr,
+        3 qw0225cr              bin fixed(31),
+        3 qw0225mv              bin fixed(31),
+        3 qw0225so              bin fixed(31),
+        3 qw0225gs              bin fixed(31),
+        3 qw0225su              bin fixed(31),
+        3 qw0225vr              bin fixed(31),
+        3 qw0225fx              bin fixed(31),
+        3 qw0225gm              bin fixed(31),
+        3 qw0225av              bin fixed(31),
+        3 qw0225ss              bin fixed(31),
+        3 qw0225va              bin fixed(63),
+        3 qw0225fa              bin fixed(63),
+        3 qw0225ga              bin fixed(63),
+        3 qw0225sm              bin fixed(63),
+        3 qw0225rl              bin fixed(63),
+        3 qw0225ax              bin fixed(63),
+        3 qw0225hvpagesinreal   bin fixed(63),
+        3 qw0225hvauxslots      bin fixed(63),
+        3 qw0225hvgpagesinreal  bin fixed(63),
+        3 qw0225hvgauxslots     bin fixed(63),
+        3 qw0225pristg_real     bin fixed(63),
+        3 qw0225pristg_aux      bin fixed(63),
+        3 qw02251flgs           bit(32),
+        3 *                     char(4),
+        3 qw0225hvpagesinreal2g bin fixed(63),
+        3 qw0225pristg_dpage    bin fixed(63);
+
+

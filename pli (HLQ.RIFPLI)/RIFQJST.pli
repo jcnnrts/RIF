@@ -1,0 +1,341 @@
+  /********************************************************************/
+  /* Process the QJST subrecord.                                      */
+  /********************************************************************/
+  processQJST: procedure;
+    dcl base                               pointer;
+    base = ifi_base + smf_base->qws0.qws00rbo;
+
+    if (debug_mode = '1'b) then do;
+      put skip list('');
+      put skip list(time()
+                 !! ' RIF0001I - I - QJST.');
+
+      put skip list(time()
+                 !! ' RIF0001I - I - qws1.qws10rbo : '
+                 !! trim(smf_base->qws1.qws10rbo));
+      put skip list(time()
+                 !! ' RIF0001I - I - qws1.qws10rbl : '
+                 !! trim(smf_base->qws1.qws10rbl));
+      put skip list(time()
+                 !! ' RIF0001I - I - qws1.qws10rbn : '
+                 !! trim(smf_base->qws1.qws10rbn));
+    end;
+
+    if (firstItteration = false
+      & gather_QJST     = '1'b) then do;
+      /* Calculate the delta between the newly fetched IFI record and */
+      /* the saved previous itteration.                               */
+
+      ins_qjst.qjstwrw  = base->qjst.qjstwrw  - saved_qjst.qjstwrw;
+      ins_qjst.qjstwrnw = base->qjst.qjstwrnw - saved_qjst.qjstwrnw;
+      ins_qjst.qjstwrf  = base->qjst.qjstwrf  - saved_qjst.qjstwrf;
+      ins_qjst.qjstwtb  = base->qjst.qjstwtb  - saved_qjst.qjstwtb;
+      ins_qjst.qjstrbuf = base->qjst.qjstrbuf - saved_qjst.qjstrbuf;
+      ins_qjst.qjstract = base->qjst.qjstract - saved_qjst.qjstract;
+      ins_qjst.qjstrarh = base->qjst.qjstrarh - saved_qjst.qjstrarh;
+      ins_qjst.qjsttvc  = base->qjst.qjsttvc  - saved_qjst.qjsttvc;
+      ins_qjst.qjstbsds = base->qjst.qjstbsds - saved_qjst.qjstbsds;
+      ins_qjst.qjstbffl = base->qjst.qjstbffl - saved_qjst.qjstbffl;
+      ins_qjst.qjstbfwr = base->qjst.qjstbfwr - saved_qjst.qjstbfwr;
+      ins_qjst.qjstalr  = base->qjst.qjstalr  - saved_qjst.qjstalr;
+      ins_qjst.qjstalw  = base->qjst.qjstalw  - saved_qjst.qjstalw;
+      ins_qjst.qjstciof = base->qjst.qjstciof - saved_qjst.qjstciof;
+      ins_qjst.qjstwur  = base->qjst.qjstwur  - saved_qjst.qjstwur;
+      ins_qjst.qjstlama = base->qjst.qjstlama - saved_qjst.qjstlama;
+      ins_qjst.qjstlams = base->qjst.qjstlams - saved_qjst.qjstlams;
+      ins_qjst.qjstlsus = base->qjst.qjstlsus - saved_qjst.qjstlsus;
+      ins_qjst.qjstlogw = base->qjst.qjstlogw - saved_qjst.qjstlogw;
+      ins_qjst.qjstciwr = base->qjst.qjstciwr - saved_qjst.qjstciwr;
+      ins_qjst.qjstserw = base->qjst.qjstserw - saved_qjst.qjstserw;
+      ins_qjst.qjstthrw = base->qjst.qjstthrw - saved_qjst.qjstthrw;
+      ins_qjst.qjstbpag = base->qjst.qjstbpag - saved_qjst.qjstbpag;
+      ins_qjst.qjstdpxt = base->qjst.qjstdpxt - saved_qjst.qjstdpxt;
+      ins_qjst.qjstdpxn = base->qjst.qjstdpxn - saved_qjst.qjstdpxn;
+      ins_qjst.qjstcdds = base->qjst.qjstcdds - saved_qjst.qjstcdds;
+      ins_qjst.qjstsycw = base->qjst.qjstsycw - saved_qjst.qjstsycw;
+      ins_qjst.qjstsycf = base->qjst.qjstsycf - saved_qjst.qjstsycf;
+
+      exec sql
+        insert into RIF.ifcid_0001_log_manager
+        values(current timestamp
+              ,:current_unix_time
+              ,:admin_info_ssid.subsystem_name
+              ,:ins_qjst.qjstwrw
+              ,:ins_qjst.qjstwrnw
+              ,:ins_qjst.qjstwrf
+              ,:ins_qjst.qjstwtb
+              ,:ins_qjst.qjstrbuf
+              ,:ins_qjst.qjstract
+              ,:ins_qjst.qjstrarh
+              ,:ins_qjst.qjsttvc
+              ,:ins_qjst.qjstbsds
+              ,:ins_qjst.qjstbffl
+              ,:ins_qjst.qjstbfwr
+              ,:ins_qjst.qjstalr
+              ,:ins_qjst.qjstalw
+              ,:ins_qjst.qjstciof
+              ,:ins_qjst.qjstwur
+              ,:ins_qjst.qjstlama
+              ,:ins_qjst.qjstlams
+              ,:ins_qjst.qjstlsus
+              ,:ins_qjst.qjstlogw
+              ,:ins_qjst.qjstciwr
+              ,:ins_qjst.qjstserw
+              ,:ins_qjst.qjstthrw
+              ,:ins_qjst.qjstbpag
+              ,:ins_qjst.qjstdpxt
+              ,:ins_qjst.qjstdpxn
+              ,:ins_qjst.qjstcdds
+              ,:ins_qjst.qjstsycw
+              ,:ins_qjst.qjstsycf);
+
+      call checksql('Insert QJST',csql_warn);
+    end;
+
+    /* Save the current version for comparison in the next itteration.*/
+    saved_qjst = base->qjst;
+  end processQJST;
+
+  /********************************************************************/
+  /* QJST based version                                               */
+  /********************************************************************/
+  dcl 1 qjst             based,     /* log statistics block         */
+        2 qjsthead,                    /* qjst header               */
+          3 qjstid char(2),         /*(s) control blck hex id (0093)*/
+          3 qjstll bin fixed(15),   /* length of block              */
+        2 qjsteid char(4),          /* ebcdic eyecatcher            */
+        2 qjstwrw  bin fixed(31),   /* wrt request count, wait      */
+        2 qjstwrnw bin fixed(31),   /* wrt request count, nowait    */
+        2 qjstwrf  bin fixed(31),   /* wrt request count, force     */
+        2 qjstwtb  bin fixed(31),   /* wait cnt for unavail buffr   */
+        2 qjstrbuf bin fixed(31),   /* log reads from output buff   */
+        2 qjstract bin fixed(31),   /* log reads from active log    */
+        2 qjstrarh bin fixed(31),   /* log reads from archive log   */
+                                    /* tu2460j                      */
+        2 qjsttvc  bin fixed(31),   /* number of read accesses      */
+                                    /* delayed due to tape volume   */
+                                    /* contention                   */
+        2 qjstbsds bin fixed(31),   /* total bsds access requests   */
+        2 qjstbffl bin fixed(31),   /* active log ci-s created      */
+        2 qjstbfwr bin fixed(31),   /* count buffer writer calls.   */
+        2 qjstalr  bin fixed(31),   /* archive read allocations     */
+        2 qjstalw  bin fixed(31),   /* archive write allocations    */
+        2 qjstciof bin fixed(31),   /* count of ci-s offloaded      */
+                                    /* kdw0038                      */
+        2 qjstwur  bin fixed(31),   /* number of read accesses      */
+                                    /* delayed due to unavailable   */
+                                    /* resource                     */
+                                    /* kdw0038                      */
+        2 qjstlama bin fixed(31),   /* number of look-ahead tape    */
+                                    /* volume mounts attempted.     */
+                                    /* this field along with field  */
+                                    /* qjstlams, will show how many */
+                                    /* times look-ahead mounting    */
+                                    /* failed, thus negating        */
+                                    /* potential significant        */
+                                    /* performance gains.           */
+                                    /* kdw0038                      */
+        2 qjstlams bin fixed(31),   /* number of look-ahead tape    */
+                                    /* volume mounts performed.     */
+        2 qjstlsus bin fixed(31),   /* (s)                          */
+        2 qjstlogw bin fixed(31),   /* total number of log write    */
+                                    /* i/o requests.                */
+        2 qjstciwr bin fixed(31),   /* total number of log cis      */
+                                    /* written.                     */
+        2 qjstserw bin fixed(31),   /* number of serial log write   */
+                                    /* requests for ci re-write     */
+                                    /* when dual logging.           */
+        2 qjstthrw bin fixed(31),   /* number of times a log-write  */
+                                    /* request was scheduled        */
+                                    /* because the log write        */
+                                    /* threshold was reached.       */
+        2 qjstbpag bin fixed(31),   /* number of times a log-write  */
+                                    /* buffer had to be paged-in    */
+                                    /* before it could be used.     */
+        2 qjstspnn bin fixed(31),   /* (s)                          */
+  /*!*/ 2 qjstspni bin fixed(63),   /* (s)                 */
+        2 qjstcl16,                     /* (s)                      */
+          3 qjstclid bin fixed(31), /* (s)                          */
+          3 qjstcl2  char(2),       /* (s)                          */
+          3 qjstclsn char(10),      /* (s)                          */
+        2 qjstdpxt bin fixed(63),   /* total time (in microseconds) */
+                                    /* xes suspended the log writer */
+                                    /* to update the secondary lock */
+                                    /* structure for asynchronous   */
+                                    /* lock duplexing.              */
+        2 qjstdpxn bin fixed(31),   /* total number of suspends     */
+                                    /* xes suspended the log writer */
+                                    /* to update the secondary lock */
+                                    /* structure for asynchronous   */
+                                    /* lock duplexing.              */
+        2 qjstcdds bin fixed(31),   /* total cdds access requests   */
+        2 qjstsycw bin fixed(31),   /* total number of zhyperlink   */
+                                    /* log write i/o requests       */
+        2 qjstsycf bin fixed(31),   /* total number of zhyperlink   */
+                                    /* log write  i/o requests which*/
+                                    /* failed to be synchronous     */
+        2 qjstaval char(104),       /* (s)                          */
+        2 qjstend  char(0);         /* end of lmc statistics block  */
+
+  /********************************************************************/
+  /* QJST saved version                                               */
+  /********************************************************************/
+  dcl 1 saved_qjst,                /* log statistics block         */
+        2 qjsthead,                    /* qjst header               */
+          3 qjstid char(2),         /*(s) control blck hex id (0093)*/
+          3 qjstll bin fixed(15),   /* length of block              */
+        2 qjsteid char(4),          /* ebcdic eyecatcher            */
+        2 qjstwrw  bin fixed(31),   /* wrt request count, wait      */
+        2 qjstwrnw bin fixed(31),   /* wrt request count, nowait    */
+        2 qjstwrf  bin fixed(31),   /* wrt request count, force     */
+        2 qjstwtb  bin fixed(31),   /* wait cnt for unavail buffr   */
+        2 qjstrbuf bin fixed(31),   /* log reads from output buff   */
+        2 qjstract bin fixed(31),   /* log reads from active log    */
+        2 qjstrarh bin fixed(31),   /* log reads from archive log   */
+                                    /* tu2460j                      */
+        2 qjsttvc  bin fixed(31),   /* number of read accesses      */
+                                    /* delayed due to tape volume   */
+                                    /* contention                   */
+        2 qjstbsds bin fixed(31),   /* total bsds access requests   */
+        2 qjstbffl bin fixed(31),   /* active log ci-s created      */
+        2 qjstbfwr bin fixed(31),   /* count buffer writer calls.   */
+        2 qjstalr  bin fixed(31),   /* archive read allocations     */
+        2 qjstalw  bin fixed(31),   /* archive write allocations    */
+        2 qjstciof bin fixed(31),   /* count of ci-s offloaded      */
+                                    /* kdw0038                      */
+        2 qjstwur  bin fixed(31),   /* number of read accesses      */
+                                    /* delayed due to unavailable   */
+                                    /* resource                     */
+                                    /* kdw0038                      */
+        2 qjstlama bin fixed(31),   /* number of look-ahead tape    */
+                                    /* volume mounts attempted.     */
+                                    /* this field along with field  */
+                                    /* qjstlams, will show how many */
+                                    /* times look-ahead mounting    */
+                                    /* failed, thus negating        */
+                                    /* potential significant        */
+                                    /* performance gains.           */
+                                    /* kdw0038                      */
+        2 qjstlams bin fixed(31),   /* number of look-ahead tape    */
+                                    /* volume mounts performed.     */
+        2 qjstlsus bin fixed(31),   /* (s)                          */
+        2 qjstlogw bin fixed(31),   /* total number of log write    */
+                                    /* i/o requests.                */
+        2 qjstciwr bin fixed(31),   /* total number of log cis      */
+                                    /* written.                     */
+        2 qjstserw bin fixed(31),   /* number of serial log write   */
+                                    /* requests for ci re-write     */
+                                    /* when dual logging.           */
+        2 qjstthrw bin fixed(31),   /* number of times a log-write  */
+                                    /* request was scheduled        */
+                                    /* because the log write        */
+                                    /* threshold was reached.       */
+        2 qjstbpag bin fixed(31),   /* number of times a log-write  */
+                                    /* buffer had to be paged-in    */
+                                    /* before it could be used.     */
+        2 qjstspnn bin fixed(31),   /* (s)                          */
+        2 qjstspni bin fixed(63),   /* (s)                          */
+        2 qjstcl16,                     /* (s)                      */
+          3 qjstclid bin fixed(31), /* (s)                 */
+          3 qjstcl2  char(2),       /* (s)                          */
+          3 qjstclsn char(10),      /* (s)                          */
+        2 qjstdpxt bin fixed(63),   /* total time (in microseconds) */
+                                    /* xes suspended the log writer */
+                                    /* to update the secondary lock */
+                                    /* structure for asynchronous   */
+                                    /* lock duplexing.              */
+        2 qjstdpxn bin fixed(31),   /* total number of suspends     */
+                                    /* xes suspended the log writer */
+                                    /* to update the secondary lock */
+                                    /* structure for asynchronous   */
+                                    /* lock duplexing.              */
+        2 qjstcdds bin fixed(31),   /* total cdds access requests   */
+        2 qjstsycw bin fixed(31),   /* total number of zhyperlink   */
+                                    /* log write i/o requests       */
+        2 qjstsycf bin fixed(31),   /* total number of zhyperlink   */
+                                    /* log write  i/o requests which*/
+                                    /* failed to be synchronous     */
+        2 qjstaval char(104),       /* (s)                          */
+        2 qjstend  char(0);         /* end of lmc statistics block  */
+
+  /********************************************************************/
+  /* QJST version for inserting                                       */
+  /********************************************************************/
+  dcl 1 ins_qjst,                  /* log statistics block         */
+        2 qjsthead,                    /* qjst header               */
+          3 qjstid char(2),         /*(s) control blck hex id (0093)*/
+          3 qjstll bin fixed(15),   /* length of block              */
+        2 qjsteid char(4),          /* ebcdic eyecatcher            */
+        2 qjstwrw  bin fixed(31),   /* wrt request count, wait      */
+        2 qjstwrnw bin fixed(31),   /* wrt request count, nowait    */
+        2 qjstwrf  bin fixed(31),   /* wrt request count, force     */
+        2 qjstwtb  bin fixed(31),   /* wait cnt for unavail buffr   */
+        2 qjstrbuf bin fixed(31),   /* log reads from output buff   */
+        2 qjstract bin fixed(31),   /* log reads from active log    */
+        2 qjstrarh bin fixed(31),   /* log reads from archive log   */
+                                    /* tu2460j                      */
+        2 qjsttvc  bin fixed(31),   /* number of read accesses      */
+                                    /* delayed due to tape volume   */
+                                    /* contention                   */
+        2 qjstbsds bin fixed(31),   /* total bsds access requests   */
+        2 qjstbffl bin fixed(31),   /* active log ci-s created      */
+        2 qjstbfwr bin fixed(31),   /* count buffer writer calls.   */
+        2 qjstalr  bin fixed(31),   /* archive read allocations     */
+        2 qjstalw  bin fixed(31),   /* archive write allocations    */
+        2 qjstciof bin fixed(31),   /* count of ci-s offloaded      */
+                                    /* kdw0038                      */
+        2 qjstwur  bin fixed(31),   /* number of read accesses      */
+                                    /* delayed due to unavailable   */
+                                    /* resource                     */
+                                    /* kdw0038                      */
+        2 qjstlama bin fixed(31),   /* number of look-ahead tape    */
+                                    /* volume mounts attempted.     */
+                                    /* this field along with field  */
+                                    /* qjstlams, will show how many */
+                                    /* times look-ahead mounting    */
+                                    /* failed, thus negating        */
+                                    /* potential significant        */
+                                    /* performance gains.           */
+                                    /* kdw0038                      */
+        2 qjstlams bin fixed(31),   /* number of look-ahead tape    */
+                                    /* volume mounts performed.     */
+        2 qjstlsus bin fixed(31),   /* (s)                          */
+        2 qjstlogw bin fixed(31),   /* total number of log write    */
+                                    /* i/o requests.                */
+        2 qjstciwr bin fixed(31),   /* total number of log cis      */
+                                    /* written.                     */
+        2 qjstserw bin fixed(31),   /* number of serial log write   */
+                                    /* requests for ci re-write     */
+                                    /* when dual logging.           */
+        2 qjstthrw bin fixed(31),   /* number of times a log-write  */
+                                    /* request was scheduled        */
+                                    /* because the log write        */
+                                    /* threshold was reached.       */
+        2 qjstbpag bin fixed(31),   /* number of times a log-write  */
+                                    /* buffer had to be paged-in    */
+                                    /* before it could be used.     */
+        2 qjstspnn bin fixed(31),   /* (s)                          */
+        2 qjstspni bin fixed(63),   /* (s)                          */
+        2 qjstcl16,                     /* (s)                      */
+          3 qjstclid bin fixed(31), /* (s)                 */
+          3 qjstcl2  char(2),       /* (s)                          */
+          3 qjstclsn char(10),      /* (s)                          */
+        2 qjstdpxt bin fixed(63),   /* total time (in microseconds) */
+                                    /* xes suspended the log writer */
+                                    /* to update the secondary lock */
+                                    /* structure for asynchronous   */
+                                    /* lock duplexing.              */
+        2 qjstdpxn bin fixed(31),   /* total number of suspends     */
+                                    /* xes suspended the log writer */
+                                    /* to update the secondary lock */
+                                    /* structure for asynchronous   */
+                                    /* lock duplexing.              */
+        2 qjstcdds bin fixed(31),   /* total cdds access requests   */
+        2 qjstsycw bin fixed(31),   /* total number of zhyperlink   */
+                                    /* log write i/o requests       */
+        2 qjstsycf bin fixed(31),   /* total number of zhyperlink   */
+                                    /* log write  i/o requests which*/
+                                    /* failed to be synchronous     */
+        2 qjstaval char(104),       /* (s)                          */
+        2 qjstend  char(0);         /* end of lmc statistics block  */
+

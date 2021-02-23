@@ -1,0 +1,457 @@
+  /********************************************************************/
+  /* Process the QBST subrecord.                                      */
+  /********************************************************************/
+  processQBST: procedure;
+    dcl base                               pointer;
+    base = ifi_base + smf_base->qws1.qws10r3o;
+
+    if (debug_mode = '1'b) then do;
+      put skip list('');
+      put skip list(time()
+                 !! ' RIF0001I - I - QBST.');
+
+      put skip list(time()
+                 !! ' RIF0001I - I - qws1.qws10r3o : '
+                 !! trim(smf_base->qws1.qws10r3o));
+      put skip list(time()
+                 !! ' RIF0001I - I - qws1.qws10r3l : '
+                 !! trim(smf_base->qws1.qws10r3l));
+      put skip list(time()
+                 !! ' RIF0001I - I - qws1.qws10r3n : '
+                 !! trim(smf_base->qws1.qws10r3n));
+    end;
+
+    dcl i                                  bin fixed(31);
+    dcl current_bpid                       bin fixed(31);
+
+    do i = 1 to smf_base->qws1.qws10r3n;
+
+      /* We use the BPID as the offset in our save array. We add one  */
+      /* to the current bpid because bpids start at 0, but PL/I arrays*/
+      /* start at 1...                                                */
+      current_bpid = base->QBST.qbstpid + 1;
+
+      if (firstItteration = false
+        & gather_QBST     = '1'b) then do;
+        /* Calculate the delta between the newly fetched IFI record an*/
+        /* the saved previous itteration.                             */
+
+        ins_QBST.qbstpid  = base->QBST.qbstpid;
+        ins_QBST.qbstcba  = base->QBST.qbstcba;
+        ins_QBST.qbstvpl  = base->QBST.qbstvpl;
+
+        ins_QBST.qbstget  = base->QBST.qbstget
+                          - saved_qbst(current_bpid).qbstget;
+        ins_QBST.qbstrio  = base->QBST.qbstrio
+                          - saved_qbst(current_bpid).qbstrio;
+        ins_QBST.qbstdwv  = base->QBST.qbstdwv
+                          - saved_qbst(current_bpid).qbstdwv;
+        ins_QBST.qbstxfl  = base->QBST.qbstxfl
+                          - saved_qbst(current_bpid).qbstxfl;
+        ins_QBST.qbstxfv  = base->QBST.qbstxfv
+                          - saved_qbst(current_bpid).qbstxfv;
+        ins_QBST.qbstsws  = base->QBST.qbstsws
+                          - saved_qbst(current_bpid).qbstsws;
+        ins_QBST.qbstpws  = base->QBST.qbstpws
+                          - saved_qbst(current_bpid).qbstpws;
+        ins_QBST.qbstwio  = base->QBST.qbstwio
+                          - saved_qbst(current_bpid).qbstwio;
+        ins_QBST.qbstrpi  = base->QBST.qbstrpi
+                          - saved_qbst(current_bpid).qbstrpi;
+        ins_QBST.qbstwpi  = base->QBST.qbstwpi
+                          - saved_qbst(current_bpid).qbstwpi;
+        ins_QBST.qbstdso  = base->QBST.qbstdso
+                          - saved_qbst(current_bpid).qbstdso;
+        ins_QBST.qbstimw  = base->QBST.qbstimw
+                          - saved_qbst(current_bpid).qbstimw;
+        ins_QBST.qbstseq  = base->QBST.qbstseq
+                          - saved_qbst(current_bpid).qbstseq;
+        ins_QBST.qbstspp  = base->QBST.qbstspp
+                          - saved_qbst(current_bpid).qbstspp;
+        ins_QBST.qbstspd  = base->QBST.qbstspd
+                          - saved_qbst(current_bpid).qbstspd;
+        ins_QBST.qbstree  = base->QBST.qbstree
+                          - saved_qbst(current_bpid).qbstree;
+        ins_QBST.qbstdwt  = base->QBST.qbstdwt
+                          - saved_qbst(current_bpid).qbstdwt;
+        ins_QBST.qbstdmc  = base->QBST.qbstdmc
+                          - saved_qbst(current_bpid).qbstdmc;
+        ins_QBST.qbstmig  = base->QBST.qbstmig
+                          - saved_qbst(current_bpid).qbstmig;
+        ins_QBST.qbstrto  = base->QBST.qbstrto
+                          - saved_qbst(current_bpid).qbstrto;
+        ins_QBST.qbstpio  = base->QBST.qbstpio
+                          - saved_qbst(current_bpid).qbstpio;
+        ins_QBST.qbstwkpd = base->QBST.qbstwkpd
+                          - saved_qbst(current_bpid).qbstwkpd;
+        ins_QBST.qbstmax  = base->QBST.qbstmax
+                          - saved_qbst(current_bpid).qbstmax;
+        ins_QBST.qbstwdrp = base->QBST.qbstwdrp
+                          - saved_qbst(current_bpid).qbstwdrp;
+        ins_QBST.qbstwbvq = base->QBST.qbstwbvq
+                          - saved_qbst(current_bpid).qbstwbvq;
+        ins_QBST.qbstwfr  = base->QBST.qbstwfr
+                          - saved_qbst(current_bpid).qbstwfr;
+        ins_QBST.qbstwft  = base->QBST.qbstwft
+                          - saved_qbst(current_bpid).qbstwft;
+        ins_QBST.qbstwfd  = base->QBST.qbstwfd
+                          - saved_qbst(current_bpid).qbstwfd;
+        ins_QBST.qbstwff  = base->QBST.qbstwff
+                          - saved_qbst(current_bpid).qbstwff;
+        ins_QBST.qbstlpf  = base->QBST.qbstlpf
+                          - saved_qbst(current_bpid).qbstlpf;
+        ins_QBST.qbstdpf  = base->QBST.qbstdpf
+                          - saved_qbst(current_bpid).qbstdpf;
+        ins_QBST.qbstvpa  = base->QBST.qbstvpa
+                          - saved_qbst(current_bpid).qbstvpa;
+        ins_QBST.qbstpco  = base->QBST.qbstpco
+                          - saved_qbst(current_bpid).qbstpco;
+        ins_QBST.qbstcio  = base->QBST.qbstcio
+                          - saved_qbst(current_bpid).qbstcio;
+        ins_QBST.qbstdpp  = base->QBST.qbstdpp
+                          - saved_qbst(current_bpid).qbstdpp;
+        ins_QBST.qbstlpp  = base->QBST.qbstlpp
+                          - saved_qbst(current_bpid).qbstlpp;
+        ins_QBST.qbstdio  = base->QBST.qbstdio
+                          - saved_qbst(current_bpid).qbstdio;
+        ins_QBST.qbstlio  = base->QBST.qbstlio
+                          - saved_qbst(current_bpid).qbstlio;
+        ins_QBST.qbstsgt  = base->QBST.qbstsgt
+                          - saved_qbst(current_bpid).qbstsgt;
+        ins_QBST.qbstsio  = base->QBST.qbstsio
+                          - saved_qbst(current_bpid).qbstsio;
+        ins_QBST.qbstngt  = base->QBST.qbstngt
+                          - saved_qbst(current_bpid).qbstngt;
+        ins_QBST.qbstxis  = base->QBST.qbstxis
+                          - saved_qbst(current_bpid).qbstxis;
+        ins_QBST.qbstjis  = base->QBST.qbstjis
+                          - saved_qbst(current_bpid).qbstjis;
+        ins_QBST.qbstpqo  = base->QBST.qbstpqo
+                          - saved_qbst(current_bpid).qbstpqo;
+        ins_QBST.qbstpqf  = base->QBST.qbstpqf
+                          - saved_qbst(current_bpid).qbstpqf;
+        ins_QBST.qbstpl1  = base->QBST.qbstpl1
+                          - saved_qbst(current_bpid).qbstpl1;
+        ins_QBST.qbstpl2  = base->QBST.qbstpl2
+                          - saved_qbst(current_bpid).qbstpl2;
+        ins_QBST.qbstnsg  = base->QBST.qbstnsg
+                          - saved_qbst(current_bpid).qbstnsg;
+       ins_QBST.qbstsyio  = base->QBST.qbstsyio
+                          - saved_qbst(current_bpid).qbstsyio;
+       ins_QBST.qbstsioc  = base->QBST.qbstsioc
+                          - saved_qbst(current_bpid).qbstsioc;
+        ins_QBST.qbstlpl  = base->QBST.qbstlpl
+                          - saved_qbst(current_bpid).qbstlpl;
+       ins_QBST.qbstsmin  = base->QBST.qbstsmin
+                          - saved_qbst(current_bpid).qbstsmin;
+       ins_QBST.qbstsmax  = base->QBST.qbstsmax
+                          - saved_qbst(current_bpid).qbstsmax;
+        ins_QBST.qbsthst  = base->QBST.qbsthst
+                          - saved_qbst(current_bpid).qbsthst;
+        ins_QBST.qbstrhs  = base->QBST.qbstrhs
+                          - saved_qbst(current_bpid).qbstrhs;
+       ins_QBST.qbstaget  = base->QBST.qbstaget
+                          - saved_qbst(current_bpid).qbstaget;
+       ins_QBST.qbstasge  = base->QBST.qbstasge
+                          - saved_qbst(current_bpid).qbstasge;
+       ins_QBST.qbstasyn  = base->QBST.qbstasyn
+                          - saved_qbst(current_bpid).qbstasyn;
+       ins_QBST.qbstasse  = base->QBST.qbstasse
+                          - saved_qbst(current_bpid).qbstasse;
+
+        ins_QBST.qbstwfm  = base->QBST.qbstwfm;
+
+        exec sql
+          insert into RIF.ifcid_0002_buffer_pool
+          values(current timestamp
+                ,:current_unix_time
+                ,:admin_info_ssid.subsystem_name
+                ,:ins_QBST.qbstpid
+                ,:ins_QBST.qbstget
+                ,:ins_QBST.qbstrio
+                ,:ins_QBST.qbstdwv
+                ,:ins_QBST.qbstxfl
+                ,:ins_QBST.qbstxfv
+                ,:ins_QBST.qbstsws
+                ,:ins_QBST.qbstpws
+                ,:ins_QBST.qbstwio
+                ,:ins_QBST.qbstcba
+                ,:ins_QBST.qbstrpi
+                ,:ins_QBST.qbstwpi
+                ,:ins_QBST.qbstdso
+                ,:ins_QBST.qbstimw
+                ,:ins_QBST.qbstseq
+                ,:ins_QBST.qbstspp
+                ,:ins_QBST.qbstspd
+                ,:ins_QBST.qbstree
+                ,:ins_QBST.qbstdwt
+                ,:ins_QBST.qbstdmc
+                ,:ins_QBST.qbstmig
+                ,:ins_QBST.qbstrto
+                ,:ins_QBST.qbstpio
+                ,:ins_QBST.qbstwkpd
+                ,:ins_QBST.qbstmax
+                ,:ins_QBST.qbstwfm
+                ,:ins_QBST.qbstwdrp
+                ,:ins_QBST.qbstwbvq
+                ,:ins_QBST.qbstwfr
+                ,:ins_QBST.qbstwft
+                ,:ins_QBST.qbstwfd
+                ,:ins_QBST.qbstwff
+                ,:ins_QBST.qbstlpf
+                ,:ins_QBST.qbstdpf
+                ,:ins_QBST.qbstvpa
+                ,:ins_QBST.qbstpco
+                ,:ins_QBST.qbstcio
+                ,:ins_QBST.qbstvpl
+                ,:ins_QBST.qbstdpp
+                ,:ins_QBST.qbstlpp
+                ,:ins_QBST.qbstdio
+                ,:ins_QBST.qbstlio
+                ,:ins_QBST.qbstsgt
+                ,:ins_QBST.qbstsio
+                ,:ins_QBST.qbstngt
+                ,:ins_QBST.qbstxis
+                ,:ins_QBST.qbstjis
+                ,:ins_QBST.qbstpqo
+                ,:ins_QBST.qbstpqf
+                ,:ins_QBST.qbstpl1
+                ,:ins_QBST.qbstpl2
+                ,:ins_QBST.qbstnsg
+                ,:ins_QBST.qbstsyio
+                ,:ins_QBST.qbstsioc
+                ,:ins_QBST.qbstlpl
+                ,:ins_QBST.qbstsmin
+                ,:ins_QBST.qbstsmax
+                ,:ins_QBST.qbsthst
+                ,:ins_QBST.qbstrhs
+                ,:ins_QBST.qbstaget
+                ,:ins_QBST.qbstasge
+                ,:ins_QBST.qbstasyn
+                ,:ins_QBST.qbstasse
+                );
+
+        call checksql('Insert QBST',csql_warn);
+      end;
+
+      saved_qbst(current_bpid) = base->qbst;
+      base += smf_base->qws1.qws10r3l;
+    end;
+  end processQBST;
+
+  /********************************************************************/
+  /* QBST based version                                               */
+  /********************************************************************/
+  dcl 1 qbst based,
+        2 qbstpid   bin fixed(31),
+        2 qbstflg   char(4),
+        2 qbstget   bin fixed(63),
+        2 qbstrio   bin fixed(63),
+        2 qbstdwv   bin fixed(63),
+        2 qbstxfl   bin fixed(63),
+        2 qbstxfv   bin fixed(63),
+        2 qbstsws   bin fixed(63),
+        2 qbstpws   bin fixed(63),
+        2 qbstwio   bin fixed(63),
+        2 qbstcba   bin fixed(63),
+        2 qbstrpi   bin fixed(63),
+        2 qbstwpi   bin fixed(63),
+        2 qbstdso   bin fixed(63),
+        2 qbstimw   bin fixed(63),
+        2 qbstseq   bin fixed(63),
+        2 qbstspp   bin fixed(63),
+        2 qbstspd   bin fixed(63),
+        2 qbstree   bin fixed(63),
+        2 qbstdwt   bin fixed(63),
+        2 qbstdmc   bin fixed(63),
+        2 qbstmig   bin fixed(63),
+        2 qbstrto   bin fixed(63),
+        2 qbstpio   bin fixed(63),
+        2 qbstwkpd  bin fixed(63),
+        2 qbstmax   bin fixed(63),
+        2 qbstwfm   bin fixed(63),
+        2 qbstwdrp  bin fixed(63),
+        2 qbstwbvq  bin fixed(63),
+        2 qbstwfr   bin fixed(63),
+        2 qbstwft   bin fixed(63),
+        2 qbstwfd   bin fixed(63),
+        2 qbstwff   bin fixed(63),
+        2 qbstlpf   bin fixed(63),
+        2 qbstdpf   bin fixed(63),
+        2 qbstvpa   bin fixed(63),
+        2 qbstpco   bin fixed(63),
+        2 qbstcio   bin fixed(63),
+        2 qbstvpl   bin fixed(63),
+        2 qbstdpp   bin fixed(63),
+        2 qbstlpp   bin fixed(63),
+        2 qbstdio   bin fixed(63),
+        2 qbstlio   bin fixed(63),
+        2 qbstsgt   bin fixed(63),
+        2 qbstsio   bin fixed(63),
+        2 qbstngt   bin fixed(63),
+        2 qbstxis   bin fixed(63),
+        2 qbstjis   bin fixed(63),
+        2 qbstpqo   bin fixed(63),
+        2 qbstpqf   bin fixed(63),
+        2 qbstpl1   bin fixed(63),
+        2 qbstpl2   bin fixed(63),
+        2 qbstnsg   bin fixed(63),
+        2 qbstsyio  bin fixed(63),
+        2 qbstsioc  bin fixed(63),
+        2 *         bin fixed(63),
+        2 *         bin fixed(63),
+        2 qbstlpl   bin fixed(63),
+        2 qbstsmin  bin fixed(63),
+        2 qbstsmax  bin fixed(63),
+        2 qbsthst   bin fixed(63),
+        2 qbstrhs   bin fixed(63),
+        2 qbstaget  bin fixed(63),
+        2 qbstasge  bin fixed(63),
+        2 qbstasyn  bin fixed(63),
+        2 qbstasse  bin fixed(63);
+
+
+  /********************************************************************/
+  /* QBST saved version                                               */
+  /********************************************************************/
+  dcl 1 saved_qbst(140),
+        2 qbstpid   bin fixed(31),
+        2 qbstflg   char(4),
+        2 qbstget   bin fixed(63),
+        2 qbstrio   bin fixed(63),
+        2 qbstdwv   bin fixed(63),
+        2 qbstxfl   bin fixed(63),
+        2 qbstxfv   bin fixed(63),
+        2 qbstsws   bin fixed(63),
+        2 qbstpws   bin fixed(63),
+        2 qbstwio   bin fixed(63),
+        2 qbstcba   bin fixed(63),
+        2 qbstrpi   bin fixed(63),
+        2 qbstwpi   bin fixed(63),
+        2 qbstdso   bin fixed(63),
+        2 qbstimw   bin fixed(63),
+        2 qbstseq   bin fixed(63),
+        2 qbstspp   bin fixed(63),
+        2 qbstspd   bin fixed(63),
+        2 qbstree   bin fixed(63),
+        2 qbstdwt   bin fixed(63),
+        2 qbstdmc   bin fixed(63),
+        2 qbstmig   bin fixed(63),
+        2 qbstrto   bin fixed(63),
+        2 qbstpio   bin fixed(63),
+        2 qbstwkpd  bin fixed(63),
+        2 qbstmax   bin fixed(63),
+        2 qbstwfm   bin fixed(63),
+        2 qbstwdrp  bin fixed(63),
+        2 qbstwbvq  bin fixed(63),
+        2 qbstwfr   bin fixed(63),
+        2 qbstwft   bin fixed(63),
+        2 qbstwfd   bin fixed(63),
+        2 qbstwff   bin fixed(63),
+        2 qbstlpf   bin fixed(63),
+        2 qbstdpf   bin fixed(63),
+        2 qbstvpa   bin fixed(63),
+        2 qbstpco   bin fixed(63),
+        2 qbstcio   bin fixed(63),
+        2 qbstvpl   bin fixed(63),
+        2 qbstdpp   bin fixed(63),
+        2 qbstlpp   bin fixed(63),
+        2 qbstdio   bin fixed(63),
+        2 qbstlio   bin fixed(63),
+        2 qbstsgt   bin fixed(63),
+        2 qbstsio   bin fixed(63),
+        2 qbstngt   bin fixed(63),
+        2 qbstxis   bin fixed(63),
+        2 qbstjis   bin fixed(63),
+        2 qbstpqo   bin fixed(63),
+        2 qbstpqf   bin fixed(63),
+        2 qbstpl1   bin fixed(63),
+        2 qbstpl2   bin fixed(63),
+        2 qbstnsg   bin fixed(63),
+        2 qbstsyio  bin fixed(63),
+        2 qbstsioc  bin fixed(63),
+        2 *         bin fixed(63),
+        2 *         bin fixed(63),
+        2 qbstlpl   bin fixed(63),
+        2 qbstsmin  bin fixed(63),
+        2 qbstsmax  bin fixed(63),
+        2 qbsthst   bin fixed(63),
+        2 qbstrhs   bin fixed(63),
+        2 qbstaget  bin fixed(63),
+        2 qbstasge  bin fixed(63),
+        2 qbstasyn  bin fixed(63),
+        2 qbstasse  bin fixed(63);
+
+
+  /********************************************************************/
+  /* QBST version for inserting                                       */
+  /********************************************************************/
+  dcl 1 ins_qbst,
+        2 qbstpid   bin fixed(31),
+        2 qbstflg   char(4),
+        2 qbstget   bin fixed(63),
+        2 qbstrio   bin fixed(63),
+        2 qbstdwv   bin fixed(63),
+        2 qbstxfl   bin fixed(63),
+        2 qbstxfv   bin fixed(63),
+        2 qbstsws   bin fixed(63),
+        2 qbstpws   bin fixed(63),
+        2 qbstwio   bin fixed(63),
+        2 qbstcba   bin fixed(63),
+        2 qbstrpi   bin fixed(63),
+        2 qbstwpi   bin fixed(63),
+        2 qbstdso   bin fixed(63),
+        2 qbstimw   bin fixed(63),
+        2 qbstseq   bin fixed(63),
+        2 qbstspp   bin fixed(63),
+        2 qbstspd   bin fixed(63),
+        2 qbstree   bin fixed(63),
+        2 qbstdwt   bin fixed(63),
+        2 qbstdmc   bin fixed(63),
+        2 qbstmig   bin fixed(63),
+        2 qbstrto   bin fixed(63),
+        2 qbstpio   bin fixed(63),
+        2 qbstwkpd  bin fixed(63),
+        2 qbstmax   bin fixed(63),
+        2 qbstwfm   bin fixed(63),
+        2 qbstwdrp  bin fixed(63),
+        2 qbstwbvq  bin fixed(63),
+        2 qbstwfr   bin fixed(63),
+        2 qbstwft   bin fixed(63),
+        2 qbstwfd   bin fixed(63),
+        2 qbstwff   bin fixed(63),
+        2 qbstlpf   bin fixed(63),
+        2 qbstdpf   bin fixed(63),
+        2 qbstvpa   bin fixed(63),
+        2 qbstpco   bin fixed(63),
+        2 qbstcio   bin fixed(63),
+        2 qbstvpl   bin fixed(63),
+        2 qbstdpp   bin fixed(63),
+        2 qbstlpp   bin fixed(63),
+        2 qbstdio   bin fixed(63),
+        2 qbstlio   bin fixed(63),
+        2 qbstsgt   bin fixed(63),
+        2 qbstsio   bin fixed(63),
+        2 qbstngt   bin fixed(63),
+        2 qbstxis   bin fixed(63),
+        2 qbstjis   bin fixed(63),
+        2 qbstpqo   bin fixed(63),
+        2 qbstpqf   bin fixed(63),
+        2 qbstpl1   bin fixed(63),
+        2 qbstpl2   bin fixed(63),
+        2 qbstnsg   bin fixed(63),
+        2 qbstsyio  bin fixed(63),
+        2 qbstsioc  bin fixed(63),
+        2 *         bin fixed(63),
+        2 *         bin fixed(63),
+        2 qbstlpl   bin fixed(63),
+        2 qbstsmin  bin fixed(63),
+        2 qbstsmax  bin fixed(63),
+        2 qbsthst   bin fixed(63),
+        2 qbstrhs   bin fixed(63),
+        2 qbstaget  bin fixed(63),
+        2 qbstasge  bin fixed(63),
+        2 qbstasyn  bin fixed(63),
+        2 qbstasse  bin fixed(63);
+
+

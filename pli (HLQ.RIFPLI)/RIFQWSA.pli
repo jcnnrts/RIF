@@ -1,0 +1,170 @@
+  /********************************************************************/
+  /* Process the QWSA subrecord.                                      */
+  /********************************************************************/
+  processQWSA: procedure;
+    dcl i                                  bin fixed(31,0);
+    dcl base                               pointer;
+
+    base = ifi_base + smf_base->qws0.qws00r1o;
+
+    /* On itteration for every section in cpu timings                 */
+    do i = 1 to smf_base->qws0.qws00r1n;
+      if (firstItteration = false
+        & gather_QBGL     = '1'b) then do;
+        ins_qwsa.qwsaproc = base->qwsa.qwsaproc;
+
+        ins_qwsa.qwsapsrb = base->qwsa.qwsapsrb
+                          - saved_qwsa(i).qwsapsrb;
+        ins_qwsa.qwsaejst = base->qwsa.qwsaejst
+                          - saved_qwsa(i).qwsaejst;
+        ins_qwsa.qwsasrbt = base->qwsa.qwsasrbt
+                          - saved_qwsa(i).qwsasrbt;
+        ins_qwsa.qwsaiipt = base->qwsa.qwsaiipt
+                          - saved_qwsa(i).qwsaiipt;
+        ins_qwsa.qwsapsrb_ziip = base->qwsa.qwsapsrb_ziip
+                               - saved_qwsa(i).qwsapsrb_ziip;
+
+        ins_qwsa.qwsapsrb = ins_qwsa.qwsapsrb / 4096000000;
+        ins_qwsa.qwsaejst = ins_qwsa.qwsaejst / 4096000000;
+        ins_qwsa.qwsasrbt = ins_qwsa.qwsasrbt / 4096000000;
+        ins_qwsa.qwsaiipt = ins_qwsa.qwsaiipt / 4096000000;
+        ins_qwsa.qwsapsrb_ziip =
+           ins_qwsa.qwsapsrb_ziip / 4096000000;
+
+
+        if (debug_mode = '1'b) then do;
+          put skip list(time()
+                     !! ' RIF0001I - I - address space : '
+                     !! base->qwsa.qwsaproc);
+          put skip list(time()
+                     !! ' RIF0001I - I - SRB           : '
+                     !! trim(ins_qwsa.qwsapsrb));
+          put skip list(time()
+                     !! ' RIF0001I - I - zIIP SRB      : '
+                     !! trim(ins_qwsa.qwsapsrb_ziip));
+          put skip list(time()
+                     !! ' RIF0001I - I - JSTEP TCB time: '
+                     !! trim(ins_qwsa.qwsaejst));
+          put skip list(time()
+                     !! ' RIF0001I - I - Step SRB      : '
+                     !! trim(ins_qwsa.qwsasrbt));
+          put skip list(time()
+                     !! ' RIF0001I - I - I/O Cpu       : '
+                     !! trim(ins_qwsa.qwsaiipt));
+        end;
+
+
+        exec sql
+          insert into RIF.ifcid_0001_cpu_data
+          values(current timestamp
+                ,:current_unix_time
+                ,:admin_info_ssid.subsystem_name
+                ,:ins_QWSA.qwsaproc
+                ,:ins_QWSA.qwsapsrb
+                ,:ins_QWSA.qwsaejst
+                ,:ins_QWSA.qwsasrbt
+                ,:ins_QWSA.qwsaiipt
+                ,:ins_QWSA.qwsapsrb_ziip
+                );
+
+        call checksql('Insert QWSA',csql_warn);
+      end;
+
+      saved_qwsa(i) = base->qwsa;
+
+      base += smf_base->qws0.qws00r1l;
+    end;
+
+  end processQWSA;
+
+  /********************************************************************/
+  /* QWSA based version                                               */
+  /********************************************************************/
+  dcl 1  qwsa  based,           /* Length = 60 bytes                 */
+      3  qwsaproc   char(4),    /* last four chars of the procedure  */
+                                /* name used to start the addr space */
+      3  qwsaejst   bin fixed(63),
+                                /* jstep timer value for addr space  */
+      3  qwsasrbt   bin fixed(63),
+                                /* srb timer value for address space */
+                                /* not including cpu consumed on an  */
+                                /* ibm ziip                          */
+      3  qwsaasid   unsigned bin fixed(16),  /* asid                 */
+      3  *          unsigned bin fixed(16),  /* reserved             */
+      3  qwsaascb   ptr,        /* ascb token                        */
+      3  qwsapsrb   bin fixed(63),
+                                /* preemptable srb timer value for   */
+                                /* address space not including cpu   */
+                                /* consumed on an ibm ziip           */
+      3  qwsapsrb_ziip bin fixed(63),
+                                /* preemptable srb timer value       */
+                                /* consumed on an ibm ziip for       */
+                                /* address space                     */
+      3  qwsamcpu   bin fixed(63),
+                                /* (s)                               */
+      3  qwsaiipt   bin fixed(63),
+                                /* cpu time for i/o interrupt        */
+                                /* processing for the address space  */
+      3  qwsaend    char(0);
+
+  /********************************************************************/
+  /* QWSA saved version                                               */
+  /********************************************************************/
+  dcl 1  saved_qwsa(6),         /* Length = 60 bytes                 */
+      3  qwsaproc   char(4),    /* last four chars of the procedure  */
+                                /* name used to start the addr space */
+      3  qwsaejst   bin fixed(63),
+                                /* jstep timer value for addr space  */
+      3  qwsasrbt   bin fixed(63),
+                                /* srb timer value for address space */
+                                /* not including cpu consumed on an  */
+                                /* ibm ziip                          */
+      3  qwsaasid   unsigned bin fixed(16),  /* asid                 */
+      3  *          unsigned bin fixed(16),  /* reserved             */
+      3  qwsaascb   ptr,        /* ascb token                        */
+      3  qwsapsrb   bin fixed(63),
+                                /* preemptable srb timer value for   */
+                                /* address space not including cpu   */
+                                /* consumed on an ibm ziip           */
+      3  qwsapsrb_ziip bin fixed(63),
+                                /* preemptable srb timer value       */
+                                /* consumed on an ibm ziip for       */
+                                /* address space                     */
+      3  qwsamcpu   bin fixed(63),
+                                /* (s)                               */
+      3  qwsaiipt   bin fixed(63),
+                                /* cpu time for i/o interrupt        */
+                                /* processing for the address space  */
+      3  qwsaend    char(0);
+
+  /********************************************************************/
+  /* QWSA version for inserting                                       */
+  /********************************************************************/
+  dcl 1  ins_qwsa,              /* Length = 60 bytes                 */
+      3  qwsaproc   char(4),    /* last four chars of the procedure  */
+                                /* name used to start the addr space */
+      3  qwsaejst   dec fixed(30,2),
+                                /* jstep timer value for addr space  */
+      3  qwsasrbt   dec fixed(30,2),
+                                /* srb timer value for address space */
+                                /* not including cpu consumed on an  */
+                                /* ibm ziip                          */
+      3  qwsaasid   unsigned bin fixed(16),  /* asid                 */
+      3  *          unsigned bin fixed(16),  /* reserved             */
+      3  qwsaascb   ptr,        /* ascb token                        */
+      3  qwsapsrb   dec fixed(30,2),
+                                /* preemptable srb timer value for   */
+                                /* address space not including cpu   */
+                                /* consumed on an ibm ziip           */
+      3  qwsapsrb_ziip dec fixed(30,2),
+                                /* preemptable srb timer value       */
+                                /* consumed on an ibm ziip for       */
+                                /* address space                     */
+      3  qwsamcpu   dec fixed(30,2),
+                                /* (s)                               */
+      3  qwsaiipt   dec fixed(30,2),
+                                /* cpu time for i/o interrupt        */
+                                /* processing for the address space  */
+      3  qwsaend    char(0);
+
+

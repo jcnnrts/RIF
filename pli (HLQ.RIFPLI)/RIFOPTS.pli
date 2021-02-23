@@ -1,0 +1,325 @@
+  /********************************************************************/        
+  /* RIFOPT options.                                                  */        
+  /********************************************************************/        
+  dcl 1 rif_options,                                                            
+        2 subsystem_id             char(4) init('DERP'),                        
+        2 rif_flags,                                                            
+          3 debug_mode             bit(1)  init('0'b),                          
+          3 gather_QWSA            bit(1)  init('0'b),                          
+          3 gather_QJST            bit(1)  init('0'b),                          
+          3 gather_Q8ST            bit(1)  init('0'b),                          
+          3 gather_QVLS            bit(1)  init('0'b),                          
+          3 gather_QBST            bit(1)  init('0'b),                          
+          3 gather_QIST            bit(1)  init('0'b),                          
+          3 gather_QISE            bit(1)  init('0'b),                          
+          3 gather_QBGL            bit(1)  init('0'b),                          
+          3 gather_QTXA            bit(1)  init('0'b),                          
+          3 gather_QTGS            bit(1)  init('0'b),                          
+          3 gather_QXCA            bit(1)  init('0'b),                          
+          3 gather_QTST            bit(1)  init('0'b),                          
+          3 gather_QWOS            bit(1)  init('0'b),                          
+          3 gather_QXST            bit(1)  init('0'b),                          
+          3 gather_QW02251         bit(1)  init('0'b),                          
+          3 gather_QW02252         bit(1)  init('0'b),                          
+          3 gather_QW02253         bit(1)  init('0'b),                          
+          3 gather_QW02254         bit(1)  init('0'b),                          
+          3 gather_QW02255         bit(1)  init('0'b),                          
+          3 gather_QW02256         bit(1)  init('0'b),                          
+          3 *                      bit(3),                                      
+        2 synch_on_second          char(2),                                     
+        2 rif_options_end          char(0);                                     
+                                                                                
+                                                                                
+  /********************************************************************/        
+  /* RIFOPT file definitions.                                         */        
+  /********************************************************************/        
+  dcl rifopt                       file record input;                           
+  dcl rifopt_eof                   bin fixed(31);                               
+  rifopt_eof                     = false;                                       
+  on endfile(rifopt)               rifopt_eof = true;                           
+                                                                                
+  dcl 1 rifopt_struct,                                                          
+        2 option                   char(40),                                    
+        2 value                    char(40);                                    
+                                                                                
+  /********************************************************************/        
+  /* RIFOPT options.                                                  */        
+  /********************************************************************/        
+  readOptions: procedure;                                                       
+    dcl skipOverview               bin fixed(31,0);                             
+    skipOverview = false;                                                       
+                                                                                
+    put skip list('');                                                          
+    put skip list(time() !! ' RIF0001I - I - Reading options file.');           
+                                                                                
+    open file(rifopt);                                                          
+    read file(rifopt) into(rifopt_struct);                                      
+                                                                                
+    do while(rifopt_eof = false);                                               
+                                                                                
+      select;                                                                   
+        when (substr(rifopt_struct.option,1,1) = '*') do;                       
+          /* Ignore because it's a comment statement.                 */        
+          skipOverview = true;                                                  
+        end;                                                                    
+                                                                                
+        when (rifopt_struct.option = (40)' ') do;                               
+          /* Ignore because it's a comment statement.                 */        
+          skipOverview = true;                                                  
+        end;                                                                    
+                                                                                
+        /* subsystem_id                                               */        
+        when (rifopt_struct.option = 'subsystem_id') do;                        
+          rif_options.subsystem_id =                                            
+            substr(rifopt_struct.value,1,4);                                    
+        end;                                                                    
+                                                                                
+        /* sync_on_second                                             */        
+        when (rifopt_struct.option = 'sync_on_second') do;                      
+          rif_options.synch_on_second =                                         
+            substr(rifopt_struct.value,1,2);                                    
+        end;                                                                    
+                                                                                
+        /* debug_mode                                                 */        
+        when (rifopt_struct.option = 'debug_mode') do;                          
+          select;                                                               
+            when (rifopt_struct.value = 'ON')  debug_mode = '1'b;               
+            when (rifopt_struct.value = 'OFF') debug_mode = '0'b;               
+            otherwise call unknownOption(rifopt_struct.option                   
+                                        ,rifopt_struct.value);                  
+          end;                                                                  
+        end;                                                                    
+                                                                                
+        /* gather_QWSA                                                */        
+        when (rifopt_struct.option = 'gather_QWSA') do;                         
+          select;                                                               
+            when (rifopt_struct.value = 'YES') gather_QWSA = '1'b;              
+            when (rifopt_struct.value = 'NO')  gather_QWSA = '0'b;              
+            otherwise call unknownOption(rifopt_struct.option                   
+                                        ,rifopt_struct.value);                  
+          end;                                                                  
+        end;                                                                    
+        /* gather_ QJST                                               */        
+        when (rifopt_struct.option = 'gather_QJST') do;                         
+          select;                                                               
+            when (rifopt_struct.value = 'YES') gather_QJST = '1'b;              
+            when (rifopt_struct.value = 'NO')  gather_QJST = '0'b;              
+            otherwise call unknownOption(rifopt_struct.option                   
+                                        ,rifopt_struct.value);                  
+          end;                                                                  
+        end;                                                                    
+        /* gather_ Q8ST                                               */        
+        when (rifopt_struct.option = 'gather_Q8ST') do;                         
+          select;                                                               
+            when (rifopt_struct.value = 'YES') gather_Q8ST = '1'b;              
+            when (rifopt_struct.value = 'NO')  gather_Q8ST = '0'b;              
+            otherwise call unknownOption(rifopt_struct.option                   
+                                        ,rifopt_struct.value);                  
+          end;                                                                  
+        end;                                                                    
+        /* gather_ QVLS                                               */        
+        when (rifopt_struct.option = 'gather_QVLS') do;                         
+          select;                                                               
+            when (rifopt_struct.value = 'YES') gather_QVLS = '1'b;              
+            when (rifopt_struct.value = 'NO')  gather_QVLS = '0'b;              
+            otherwise call unknownOption(rifopt_struct.option                   
+                                        ,rifopt_struct.value);                  
+          end;                                                                  
+        end;                                                                    
+        /* gather_ QBST                                               */        
+        when (rifopt_struct.option = 'gather_QBST') do;                         
+          select;                                                               
+            when (rifopt_struct.value = 'YES') gather_QBST = '1'b;              
+            when (rifopt_struct.value = 'NO')  gather_QBST = '0'b;              
+            otherwise call unknownOption(rifopt_struct.option                   
+                                        ,rifopt_struct.value);                  
+          end;                                                                  
+        end;                                                                    
+        /* gather_ QIST                                               */        
+        when (rifopt_struct.option = 'gather_QIST') do;                         
+          select;                                                               
+            when (rifopt_struct.value = 'YES') gather_QIST = '1'b;              
+            when (rifopt_struct.value = 'NO')  gather_QIST = '0'b;              
+            otherwise call unknownOption(rifopt_struct.option                   
+                                        ,rifopt_struct.value);                  
+          end;                                                                  
+        end;                                                                    
+        /* gather_ QISE                                               */        
+        when (rifopt_struct.option = 'gather_QISE') do;                         
+          select;                                                               
+            when (rifopt_struct.value = 'YES') gather_QISE = '1'b;              
+            when (rifopt_struct.value = 'NO')  gather_QISE = '0'b;              
+            otherwise call unknownOption(rifopt_struct.option                   
+                                        ,rifopt_struct.value);                  
+          end;                                                                  
+        end;                                                                    
+        /* gather_ QBGL                                               */        
+        when (rifopt_struct.option = 'gather_QBGL') do;                         
+          select;                                                               
+            when (rifopt_struct.value = 'YES') gather_QBGL = '1'b;              
+            when (rifopt_struct.value = 'NO')  gather_QBGL = '0'b;              
+            otherwise call unknownOption(rifopt_struct.option                   
+                                        ,rifopt_struct.value);                  
+          end;                                                                  
+        end;                                                                    
+        /* gather_ QTXA                                               */        
+        when (rifopt_struct.option = 'gather_QTXA') do;                         
+          select;                                                               
+            when (rifopt_struct.value = 'YES') gather_QTXA = '1'b;              
+            when (rifopt_struct.value = 'NO')  gather_QTXA = '0'b;              
+            otherwise call unknownOption(rifopt_struct.option                   
+                                        ,rifopt_struct.value);                  
+          end;                                                                  
+        end;                                                                    
+        /* gather_ QTGS                                               */        
+        when (rifopt_struct.option = 'gather_QTGS') do;                         
+          select;                                                               
+            when (rifopt_struct.value = 'YES') gather_QTGS = '1'b;              
+            when (rifopt_struct.value = 'NO')  gather_QTGS = '0'b;              
+            otherwise call unknownOption(rifopt_struct.option                   
+                                        ,rifopt_struct.value);                  
+          end;                                                                  
+        end;                                                                    
+        /* gather_ QXCA                                               */        
+        when (rifopt_struct.option = 'gather_QXCA') do;                         
+          select;                                                               
+            when (rifopt_struct.value = 'YES') gather_QXCA = '1'b;              
+            when (rifopt_struct.value = 'NO')  gather_QXCA = '0'b;              
+            otherwise call unknownOption(rifopt_struct.option                   
+                                        ,rifopt_struct.value);                  
+          end;                                                                  
+        end;                                                                    
+        /* gather_QTST                                                */        
+        when (rifopt_struct.option = 'gather_QTST') do;                         
+          select;                                                               
+            when (rifopt_struct.value = 'YES') gather_QTST = '1'b;              
+            when (rifopt_struct.value = 'NO')  gather_QTST = '0'b;              
+            otherwise call unknownOption(rifopt_struct.option                   
+                                        ,rifopt_struct.value);                  
+          end;                                                                  
+        end;                                                                    
+        /* gather_QWOS                                                */        
+        when (rifopt_struct.option = 'gather_QWOS') do;                         
+          select;                                                               
+            when (rifopt_struct.value = 'YES') gather_QWOS = '1'b;              
+            when (rifopt_struct.value = 'NO')  gather_QWOS = '0'b;              
+            otherwise call unknownOption(rifopt_struct.option                   
+                                        ,rifopt_struct.value);                  
+          end;                                                                  
+        end;                                                                    
+        /* gather_ QXST                                               */        
+        when (rifopt_struct.option = 'gather_QXST') do;                         
+          select;                                                               
+            when (rifopt_struct.value = 'YES') gather_QXST = '1'b;              
+            when (rifopt_struct.value = 'NO')  gather_QXST = '0'b;              
+            otherwise call unknownOption(rifopt_struct.option                   
+                                        ,rifopt_struct.value);                  
+          end;                                                                  
+        end;                                                                    
+        /* gather_ QW02251                                            */        
+        when (rifopt_struct.option = 'gather_QW02251') do;                      
+          select;                                                               
+            when (rifopt_struct.value = 'YES') gather_QW02251 = '1'b;           
+            when (rifopt_struct.value = 'NO')  gather_QW02251 = '0'b;           
+            otherwise call unknownOption(rifopt_struct.option                   
+                                        ,rifopt_struct.value);                  
+          end;                                                                  
+        end;                                                                    
+        /* gather_ QW02252                                            */        
+        when (rifopt_struct.option = 'gather_QW02252') do;                      
+          select;                                                               
+            when (rifopt_struct.value = 'YES') gather_QW02252 = '1'b;           
+            when (rifopt_struct.value = 'NO')  gather_QW02252 = '0'b;           
+            otherwise call unknownOption(rifopt_struct.option                   
+                                        ,rifopt_struct.value);                  
+          end;                                                                  
+        end;                                                                    
+        /* gather_ QW02253                                            */        
+        when (rifopt_struct.option = 'gather_QW02253') do;                      
+          select;                                                               
+            when (rifopt_struct.value = 'YES') gather_QW02253 = '1'b;           
+            when (rifopt_struct.value = 'NO')  gather_QW02253 = '0'b;           
+            otherwise call unknownOption(rifopt_struct.option                   
+                                        ,rifopt_struct.value);                  
+          end;                                                                  
+        end;                                                                    
+        /* gather_ QW02254                                            */        
+        when (rifopt_struct.option = 'gather_QW02254') do;                      
+          select;                                                               
+            when (rifopt_struct.value = 'YES') gather_QW02254 = '1'b;           
+            when (rifopt_struct.value = 'NO')  gather_QW02254 = '0'b;           
+            otherwise call unknownOption(rifopt_struct.option                   
+                                        ,rifopt_struct.value);                  
+          end;                                                                  
+        end;                                                                    
+        /* gather_ QW02255                                            */        
+        when (rifopt_struct.option = 'gather_QW02255') do;                      
+          select;                                                               
+            when (rifopt_struct.value = 'YES') gather_QW02255 = '1'b;           
+            when (rifopt_struct.value = 'NO')  gather_QW02255 = '0'b;           
+            otherwise call unknownOption(rifopt_struct.option                   
+                                        ,rifopt_struct.value);                  
+          end;                                                                  
+        end;                                                                    
+        /* gather_ QW02256                                            */        
+        when (rifopt_struct.option = 'gather_QW02256') do;                      
+          select;                                                               
+            when (rifopt_struct.value = 'YES') gather_QW02256 = '1'b;           
+            when (rifopt_struct.value = 'NO')  gather_QW02256 = '0'b;           
+            otherwise call unknownOption(rifopt_struct.option                   
+                                        ,rifopt_struct.value);                  
+          end;                                                                  
+        end;                                                                    
+                                                                                
+        /* Ignore everything else.                                    */        
+        otherwise do;                                                           
+          put skip list(time()                                                  
+                     !! ' RIF0001W - W - Unknown option : "'                    
+                     !! trim(rifopt_struct.option)                              
+                     !! '". Option was ignored.');                              
+                                                                                
+          skipOverview = true;                                                  
+        end;                                                                    
+      end;                                                                      
+                                                                                
+                                                                                
+      if (skipOverview = false) then do;                                        
+        put skip list(time()                                                    
+                  !! ' RIF0001I - I - Option '                                  
+                  !! trim(rifopt_struct.option)                                 
+                  !! ' value is '                                               
+                  !! trim(rifopt_struct.value)                                  
+                  !! '.');                                                      
+      end;                                                                      
+      else do;                                                                  
+        skipOverview = false;                                                   
+      end;                                                                      
+                                                                                
+                                                                                
+      read file(rifopt) into(rifopt_struct);                                    
+                                                                                
+    end;                                                                        
+                                                                                
+    close file(rifopt);                                                         
+                                                                                
+    put skip list(time() !! ' RIF0001I - I - Options file read.');              
+    put skip list('');                                                          
+  end readOptions;                                                              
+                                                                                
+  /********************************************************************/        
+  /* Handle unknown option being passed.                              */        
+  /********************************************************************/        
+  unknownOption: procedure(i_option, i_value);                                  
+    dcl i_option                      char(40);                                 
+    dcl i_value                       char(40);                                 
+                                                                                
+    put skip list(time()                                                        
+               !! ' RIF0001W - W - Unknown value given for option "'            
+               !! trim(i_option)                                                
+               !! '". Value was "'                                              
+               !! trim(i_value)                                                 
+               !! '".');                                                        
+    put skip list(time()                                                        
+               !! '                Option was ignored and default '             
+               !! 'was used.');                                                 
+  end unknownOption;                                                            

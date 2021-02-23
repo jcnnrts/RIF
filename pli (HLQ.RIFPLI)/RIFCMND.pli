@@ -1,0 +1,72 @@
+ /**********************************************************************        
+ * Date       ! By     ! Summary of changes                            *        
+ *------------+--------+-----------------------------------------------*        
+ * 2016-05-11 ! TSATJA ! Init.                                         *        
+ ***********************************************************************        
+ *                                                                     *        
+ *                        PLEASE READ                                  *        
+ *                                                                     *        
+ * Before using this book, please contact the developer.               *        
+ *                                                                     *        
+ ***********************************************************************        
+ *                                                                     *        
+ * Includable book that provides you with the means to asynchronously  *        
+ * wait for a STOP command entered on an MVS console. When you call    *        
+ * listenForStop(), a new thread will be ATTACHed. This thread will    *        
+ * run a PL/1 program that calls an assembler module. This assembler   *        
+ * module will then WAIT on the ECB given to it from the Communication *        
+ * Environment List that is POSTed by the operating system every time  *        
+ * a command is passed to the address space.                           *        
+ *                                                                     *        
+ * When this assembler program gets POSTed, it checks if the command   *        
+ * was a stop command. If this was indeed the case, it returns control *        
+ * to the PL/1 program that originally called it. This PL/1 program    *        
+ * will update the passed 1-byte zone with the value of 'Y'. The       *        
+ * application that originally requested the services of this book is  *        
+ * responsible to check for this value whenever it sees fit. It is     *        
+ * also up to the application to interpret the STOP command as it      *        
+ * sees fit.                                                           *        
+ *                                                                     *        
+ ***********************************************************************        
+                                                                                
+ /*********************************************************************/        
+ /* Mandatory definition.                                             */        
+ /*********************************************************************/        
+ dcl 1 comnd_commarea union aligned,                                            
+       2 asStr                       char(17),                                  
+       2 *,                                                                     
+         3 eye                       char(8) init('RIFATCH_'),                  
+         3 ECBPtr                    pointer,                                   
+         3 comptr                    pointer,                                   
+         3 shutdown                  char(1) init('N');                         
+ dcl 1 comnd_commarea_ptr            pointer;                                   
+                                                                                
+ /*********************************************************************/        
+ /* Entry to a PL/1 program that wraps assembler program that WAITs   */        
+ /* for console commands.                                             */        
+ /*                                                                   */        
+ /* We need the dummy entry to fool the compiler in to ATTACHing a    */        
+ /* fetchable procedure.                                              */        
+ /*********************************************************************/        
+ dcl RIFATCH                         entry options(asm,inter)                   
+                                           ext;                                 
+                                                                                
+ /*********************************************************************/        
+ /* Asynchronously start listening for a STOP command.                */        
+ /* If a STOP command is received, comnd_commarea.shutdown is set to  */        
+ /* 'Y', and the attached thread is stopped.                          */        
+ /*********************************************************************/        
+ listenForStop: proc(iECB) reorder;                                             
+  dcl iECB                           type ECB byaddr;                           
+                                                                                
+  fetch RIFATCH;                                                                
+  comnd_commarea.ECBPtr = addr(iECB);                                           
+                                                                                
+  display('RIF0001I - CA ADDR : ' !! hex(addr(comnd_commarea)));                
+                                                                                
+  /* RIFATCH performs a *real* attach, not an LE pthread()            */        
+  call RIFATCH(addr(comnd_commarea));                                           
+                                                                                
+  put skip list(time()                                                          
+             !! ' RIF0001I - I - Listening for stop commands.');                
+ end listenForStop;                                                             

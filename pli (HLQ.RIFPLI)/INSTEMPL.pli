@@ -1,0 +1,43 @@
+  /********************************************************************/
+  /* Process the $$$$ subrecord.                                      */
+  /********************************************************************/
+  process$$$$: procedure;
+    dcl base                               pointer;
+    base = ifi_base + smf_base->qws .        ;
+
+    if (firstItteration = false) then do;
+      /* Calculate the delta between the newly fetched IFI record and */
+      /* the saved previous itteration.                               */
+
+      ins_$$$$.            = base->$$$$.         - saved_$$$$.
+
+      exec sql
+        insert into RIF.ifcid_&&&&_&&&&&&&&&&&
+        values(current timestamp
+              ,:current_unix_time
+              ,:admin_info_ssid.subsystem_name
+              ,:ins_$$$$.$$$$wrw
+              );
+
+      call checksql('Insert $$$$');
+    end;
+
+    /* Save the current version for comparison in the next itteration.*/
+    saved_$$$$ = base->$$$$;
+  end process$$$$;
+
+  /********************************************************************/
+  /* $$$$ based version                                               */
+  /********************************************************************/
+
+
+  /********************************************************************/
+  /* $$$$ saved version                                               */
+  /********************************************************************/
+
+
+  /********************************************************************/
+  /* $$$$ version for inserting                                       */
+  /********************************************************************/
+
+

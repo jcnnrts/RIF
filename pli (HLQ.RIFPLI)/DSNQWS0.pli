@@ -1,0 +1,63 @@
+  /* IFCID self defining section */                                             
+  DCL 1  QWS0  BASED,                                                           
+         /* PRODUCT SECTION FOR SYSTEM  STATISTICS CONTAINS THE                 
+            STANDARD HEADER MAPPED BY DSNDQWHS */                               
+      3  QWS00PSO   BIN FIXED(31), /*OFFSET TO THE PRODUCT SECTION */           
+      3  QWS00PSL   BIN FIXED(15), /*LENGTH OF THE PRODUCT SECTION */           
+      3  QWS00PSN   BIN FIXED(15), /*NUMBER OF PRODUCT SECTIONS*/               
+ /* FOR RMID 26 MAPPED BY DSNDQWSA  */                                          
+      3  QWS00R1O   BIN FIXED(31), /*OFFSET TO THE DATA SECTION    */           
+      3  QWS00R1L   BIN FIXED(15), /*LENGTH OF THE DATA SECTION */              
+      3  QWS00R1N   BIN FIXED(15), /*NUMBER OF DATA SECTIONS*/                  
+ /* FOR RMID 26 MAPPED BY DSNDQWSB  */                                          
+      3  QWS00R2O   BIN FIXED(31), /*OFFSET TO THE DATA SECTION    */           
+      3  QWS00R2L   BIN FIXED(15), /*LENGTH OF THE DATA SECTION */              
+      3  QWS00R2N   BIN FIXED(15), /*NUMBER OF DATA SECTIONS*/                  
+ /* FOR RMID 26 MAPPED BY DSNDQWSC  */                                          
+      3  QWS00R3O   BIN FIXED(31), /*OFFSET TO THE DATA SECTION    */           
+      3  QWS00R3L   BIN FIXED(15), /*LENGTH OF THE DATA SECTION */              
+      3  QWS00R3N   BIN FIXED(15), /*NUMBER OF DATA SECTIONS*/                  
+ /* FOR RMID    MAPPED BY DSNDQ3ST   SSSC        */                             
+      3  QWS00R4O   BIN FIXED(31), /*OFFSET TO THE DATA SECTION    */           
+      3  QWS00R4L   BIN FIXED(15), /*LENGTH OF THE DATA SECTION */              
+      3  QWS00R4N   BIN FIXED(15), /*NUMBER OF DATA SECTIONS*/                  
+ /* FOR RMID    MAPPED BY  DSNDQ9ST   COMMAND PROCESSOR */                      
+      3  QWS00R5O   BIN FIXED(31), /*OFFSET TO THE DATA SECTION    */           
+      3  QWS00R5L   BIN FIXED(15), /*LENGTH OF THE DATA SECTION */              
+      3  QWS00R5N   BIN FIXED(15), /*NUMBER OF DATA SECTIONS*/                  
+ /* FOR RMID 26 MAPPED BY  DSNDQWSD - IFC CHECKPOINT - NEW R2   */              
+      3  QWS00R6O   BIN FIXED(31), /*OFFSET TO THE DATA SECTION    */           
+      3  QWS00R6L   BIN FIXED(15), /*LENGTH OF THE DATA SECTION */              
+      3  QWS00R6N   BIN FIXED(15), /*NUMBER OF DATA SECTIONS*/                  
+ /* FOR RMID    MAPPED BY  DSNDQVLS      LATCH MANAGER     */                   
+      3  QWS00R7O   BIN FIXED(31), /*OFFSET TO THE DATA SECTION    */           
+      3  QWS00R7L   BIN FIXED(15), /*LENGTH OF THE DATA SECTION */              
+      3  QWS00R7N   BIN FIXED(15), /*NUMBER OF DATA SECTIONS*/                  
+ /* FOR RMID    MAPPED BY  DSNDQVAS       ASMC              */                  
+      3  QWS00R8O   BIN FIXED(31), /*OFFSET TO THE DATA SECTION    */           
+      3  QWS00R8L   BIN FIXED(15), /*LENGTH OF THE DATA SECTION */              
+      3  QWS00R8N   BIN FIXED(15), /*NUMBER OF DATA SECTIONS*/                  
+ /* FOR RMID    MAPPED BY  DSNDQSST        STORAGE MANAGER  */                  
+      3  QWS00R9O   BIN FIXED(31), /*OFFSET TO THE DATA SECTION    */           
+      3  QWS00R9L   BIN FIXED(15), /*LENGTH OF THE DATA SECTION */              
+      3  QWS00R9N   BIN FIXED(15), /*NUMBER OF DATA SECTIONS*/                  
+ /* FOR RMID 16 MAPPED BY  DSNDQWTR - TRACE - DELETED R2 */                     
+ /* DDF - CHANGE */                                                             
+ /* FOR RMID     MAPPED BY DSNDQLST - DDF - V2R2         */                     
+      3  QWS00RAO   BIN FIXED(31), /*OFFSET TO THE DATA SECTION      */         
+      3  QWS00RAL   BIN FIXED(15), /*LENGTH OF THE DATA SECTION      */         
+      3  QWS00RAN   BIN FIXED(15), /*NUMBER OF DATA SECTIONS         */         
+ /* FOR RMID 004 MAPPED BY DSNDQJST         LOG MANAGER              */         
+      3  QWS00RBO   BIN FIXED(31), /*OFFSET TO THE DATA SECTION      */         
+      3  QWS00RBL   BIN FIXED(15), /*LENGTH OF THE DATA SECTION      */         
+      3  QWS00RBN   BIN FIXED(15), /*NUMBER OF DATA SECTIONS         */         
+ /* FOR RMID    MAPPED BY  DSNDQDST   DDF SYSTEM STATISTICS          */         
+      3  QWS00RCO   BIN FIXED(31), /*OFFSET TO THE DATA SECTION      */         
+      3  QWS00RCL   BIN FIXED(15), /*LENGTH OF THE DATA SECTION      */         
+      3  QWS00RCN   BIN FIXED(15), /*NUMBER OF DATA SECTIONS         */         
+ /* FOR RMID     MAPPED BY DSNDQWOS ZOS SYSTEM STATISTICS            */         
+      3  QWS00RDO   BIN FIXED(31), /*OFFSET TO THE DATA SECTION      */         
+      3  QWS00RDL   BIN FIXED(15), /*LENGTH OF THE DATA SECTION      */         
+      3  QWS00RDN   BIN FIXED(15), /*NUMBER OF DATA SECTIONS         */         
+      3  QWS00END   CHAR(0);     /* END OF THE SELF DEFINING SECTION */         
+                                                                                

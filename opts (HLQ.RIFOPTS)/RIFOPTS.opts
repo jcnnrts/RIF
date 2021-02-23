@@ -1,0 +1,32 @@
+*IFCID sections marked with "YES" here are considered to be  working.
+* General options
+subsystem_id                            <datasharing group or subsystem name>
+* Debug mode will spit out hex dumps of gathered IFCIDs and give some
+* information about the location of the sections in the STC's job output.
+debug_mode                              NO
+
+* Determine which subrecords of IFCID 1 are included
+gather_QWSA                             YES
+gather_QJST                             YES
+gather_QWOS                             NO
+gather_QVLS                             NO
+
+* Determine which subrecords of IFCID 2 are included
+gather_Q8ST                             YES
+gather_QBST                             YES
+gather_QIST                             YES
+gather_QISE                             YES
+gather_QBGL                             YES
+gather_QTXA                             YES
+gather_QTGS                             YES
+gather_QXCA                             YES
+gather_QTST                             YES
+gather_QXST                             YES
+
+* Determine which subrecords of IFCID 225 are included
+gather_QW02251                          YES
+gather_QW02252                          NO
+gather_QW02253                          NO
+gather_QW02254                          NO
+gather_QW02255                          NO
+gather_QW02256                          NO

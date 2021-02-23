@@ -1,0 +1,44 @@
+  /* This is not an actual mapping of QW03, it is the home-written              
+     index of the 225 ifcid data sections, which is not provided by             
+     IBM                                                                        
+  */                                                                            
+                                                                                
+  /* Use variable smf_base to base this structure off of.           */          
+                                                                                
+   dcl 1  qw03225  based,                                                       
+  /* Default header DSNDQWHS */                                                 
+       3  qw0225pso  bin fixed(31), /*offset to the data section    */          
+       3  qw0225psl  bin fixed(15), /*length of the data section */             
+       3  qw0225psn  bin fixed(15), /*number of data sections*/                 
+                                                                                
+  /* for data section 1 - mapped by QW02251 - AS Summary */                     
+       3  qw02251o   bin fixed(31), /*offset to the data section    */          
+       3  qw02251l   bin fixed(15), /*length of the data section */             
+       3  qw02251n   bin fixed(15), /*number of data sections*/                 
+                                                                                
+  /* for data section 2 - mapped by QW02252 - Thread information */             
+       3  qw02252o   bin fixed(31), /*offset to the data section    */          
+       3  qw02252l   bin fixed(15), /*length of the data section */             
+       3  qw02252n   bin fixed(15), /*number of data sections*/                 
+                                                                                
+  /* for data section 3 - mapped by QW02253 - Shrd & cmn storage */             
+       3  qw02253o   bin fixed(31), /*offset to the data section    */          
+       3  qw02253l   bin fixed(15), /*length of the data section */             
+       3  qw02253n   bin fixed(15), /*number of data sections*/                 
+                                                                                
+  /* for data section 4 - mapped by QW02254 - Stmt cache & xproc */             
+       3  qw02254o   bin fixed(31), /*offset to the data section    */          
+       3  qw02254l   bin fixed(15), /*length of the data section */             
+       3  qw02254n   bin fixed(15), /*number of data sections*/                 
+                                                                                
+  /* for data section 5 - mapped by QW02255 - Pool details */                   
+       3  qw02255o   bin fixed(31), /*offset to the data section    */          
+       3  qw02255l   bin fixed(15), /*length of the data section */             
+       3  qw02255n   bin fixed(15), /*number of data sections*/                 
+                                                                                
+  /* for data section 6 - mapped by QW02256 - IRLM Pool statistics */           
+       3  qw02256o   bin fixed(31), /*offset to the data section    */          
+       3  qw02256l   bin fixed(15), /*length of the data section */             
+       3  qw02256n   bin fixed(15), /*number of data sections*/                 
+                                                                                
+       3  *          char(0);     /* end of the self defining section*/         
