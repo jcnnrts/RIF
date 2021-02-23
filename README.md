@@ -2,7 +2,7 @@
 
 Before running any job, complete the jobcard.
 
-Before running any job, do a 'c all <RIFHLQ>' to your chosen high level qualifier.
+Before running any job, do a 'c all \<RIFHLQ\>' to your chosen high level qualifier.
 
 Before running any job, do a 'c all <DB2HLQ>' to your Db2 installation's HLQ.
 
