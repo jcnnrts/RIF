@@ -1,8 +1,11 @@
 # RIF
 
 Before running any job, complete the jobcard.
+
 Before running any job, do a 'c all <RIFHLQ>' to your chosen high level qualifier.
+
 Before running any job, do a 'c all <DB2HLQ>' to your Db2 installation's HLQ.
+
 Before running any job, check for parameters that have to be altered. They will always be masked with ????.
 
 Allocate a <RIFHLQ>.RIFDBRM PDS to house the DBRMs.
