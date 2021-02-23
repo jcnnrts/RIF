@@ -9,9 +9,9 @@ Allocate a <RIFHLQ>.RIFDBRM PDS to house the DBRMs.
 Allocate a <RIFHLQ>.RIFLOAD PDS to house the load modules.
 
 Allocate the following FB LRECL 80 libraries, proceed by transferring the relevant files to members in these libraries.
-- <RIFHLQ>.RIFSRC
-- <RIFHLQ>.RIFASM
-- <RIFHLQ>.RIFJCL
+- RIFHLQ.RIFSRC
+- RIFHLQ.RIFASM
+- RIFHLQ.RIFJCL
 
 Next:
 1. Run the DDL in 'ddl/RIF database schemas.sql' on the subsystem you want to monitor.
